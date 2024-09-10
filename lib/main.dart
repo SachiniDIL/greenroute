@@ -12,7 +12,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: "GREENROUTE",
       home: Scaffold(
-        body: Center(child: Image.asset('assets/garbage_truck.png')),
+        body: Center(
+            child: Image.asset(
+          'assets/garbage_truck.png',
+          height: 100,
+        )),
       ),
     );
   }
