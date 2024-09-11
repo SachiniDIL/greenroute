@@ -31,7 +31,7 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
 
     // Wait for 800ms and navigate to the SelectRole screen
-    Future.delayed(const Duration(milliseconds: 800), () {
+    Future.delayed(const Duration(milliseconds: 1000), () {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const SelectRole()),

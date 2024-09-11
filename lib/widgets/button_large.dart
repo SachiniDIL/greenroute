@@ -11,7 +11,7 @@ class BtnLarge extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Container(
+        SizedBox(
           width: 265,
           height: 60,
           child: Stack(

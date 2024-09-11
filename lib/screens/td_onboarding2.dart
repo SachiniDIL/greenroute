@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:greenroute/screens/r_onboarding2.dart';
+import 'package:greenroute/screens/onboarding_last.dart';
 import 'package:greenroute/theme.dart';
 import 'package:greenroute/widgets/skip_button.dart';
 
-class ROnboarding1 extends StatelessWidget {
-  const ROnboarding1({super.key});
+class TdOnboarding2 extends StatelessWidget {
+  const TdOnboarding2({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: "resident onboarding 1",
+      title: "truck driver onboarding 2",
       home: Scaffold(
         body: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -21,7 +21,7 @@ class ROnboarding1 extends StatelessWidget {
                 height: 142,
               ),
               Image.asset(
-                "assets/r_onboarding1.png",
+                "assets/td_onboarding2.png",
                 height: 245,
               ),
               const SizedBox(
@@ -31,7 +31,7 @@ class ROnboarding1 extends StatelessWidget {
                 width: 288,
                 height: 126,
                 child: Text(
-                  "Manage your waste with    ease—track, log, and stay informed.",
+                  "Stay informed on collections and handle challenges seamlessly.",
                   style: AppTextStyles.onboardingText,
                   textAlign: TextAlign.center,
                 ),
@@ -51,20 +51,22 @@ class ROnboarding1 extends StatelessWidget {
                         width: 8,
                         height: 8,
                         decoration: ShapeDecoration(
-                          color: Colors.black.withOpacity(0.20000000298023224),
+                          color: Colors.black.withOpacity(0.2),
                           shape: const OvalBorder(),
                         ),
                       ),
                     ),
                     Positioned(
-                      left: 35,
+                      left: 12,
                       top: 0,
                       child: Container(
-                        width: 8,
+                        width: 31,
                         height: 8,
                         decoration: ShapeDecoration(
-                          color: Colors.black.withOpacity(0.20000000298023224),
-                          shape: const OvalBorder(),
+                          color: Colors.black.withOpacity(0.2),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(50),
+                          ),
                         ),
                       ),
                     ),
@@ -72,13 +74,11 @@ class ROnboarding1 extends StatelessWidget {
                       left: 0,
                       top: 0,
                       child: Container(
-                        width: 31,
+                        width: 8,
                         height: 8,
                         decoration: ShapeDecoration(
-                          color: Colors.black.withOpacity(0.20000000298023224),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(50),
-                          ),
+                          color: Colors.black.withOpacity(0.2),
+                          shape: const OvalBorder(),
                         ),
                       ),
                     ),
@@ -98,7 +98,7 @@ class ROnboarding1 extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                             builder: (context) =>
-                                const ROnboarding2()), // Replace with desired page
+                                const OnboardingLast()), // Replace with desired page
                       );
                     },
                   ),

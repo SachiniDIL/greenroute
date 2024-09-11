@@ -1,43 +1,60 @@
 import 'package:flutter/material.dart';
-import 'package:greenroute/screens/r_onboarding2.dart';
+import 'package:greenroute/screens/r_onboarding1.dart';
 import 'package:greenroute/theme.dart';
-import 'package:greenroute/widgets/skip_button.dart';
+import 'package:greenroute/widgets/button_small.dart';
 
-class ROnboarding1 extends StatelessWidget {
-  const ROnboarding1({super.key});
+class OnboardingLast extends StatelessWidget {
+  const OnboardingLast({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: "resident onboarding 1",
+      title: "last onboarding",
       home: Scaffold(
         body: Padding(
           padding: const EdgeInsets.all(24.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment:
+                CrossAxisAlignment.center, // Center horizontally
             children: [
               const SizedBox(
-                height: 142,
+                height: 125,
               ),
-              Image.asset(
-                "assets/r_onboarding1.png",
-                height: 245,
+              Center(
+                child: Image.asset(
+                  "assets/onboarding_last.png",
+                  height: 240,
+                ),
               ),
               const SizedBox(
                 height: 40,
               ),
               const SizedBox(
                 width: 288,
-                height: 126,
+                height: 54,
                 child: Text(
-                  "Manage your waste with    ease—track, log, and stay informed.",
+                  "Stay updated on collection times and special requests.",
                   style: AppTextStyles.onboardingText,
                   textAlign: TextAlign.center,
                 ),
               ),
               const SizedBox(
-                height: 100,
+                height: 54,
+              ),
+              BtnSmall(
+                buttonText: "Let's get started!",
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const ROnboarding1()),
+                  );
+                },
+              ),
+              const SizedBox(
+                height: 109,
               ),
               SizedBox(
                 width: 55,
@@ -45,25 +62,27 @@ class ROnboarding1 extends StatelessWidget {
                 child: Stack(
                   children: [
                     Positioned(
-                      left: 47,
+                      left: 24,
                       top: 0,
                       child: Container(
-                        width: 8,
+                        width: 31,
                         height: 8,
                         decoration: ShapeDecoration(
-                          color: Colors.black.withOpacity(0.20000000298023224),
-                          shape: const OvalBorder(),
+                          color: Colors.black.withOpacity(0.2),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(50),
+                          ),
                         ),
                       ),
                     ),
                     Positioned(
-                      left: 35,
+                      left: 12,
                       top: 0,
                       child: Container(
                         width: 8,
                         height: 8,
                         decoration: ShapeDecoration(
-                          color: Colors.black.withOpacity(0.20000000298023224),
+                          color: Colors.black.withOpacity(0.2),
                           shape: const OvalBorder(),
                         ),
                       ),
@@ -72,13 +91,11 @@ class ROnboarding1 extends StatelessWidget {
                       left: 0,
                       top: 0,
                       child: Container(
-                        width: 31,
+                        width: 8,
                         height: 8,
                         decoration: ShapeDecoration(
-                          color: Colors.black.withOpacity(0.20000000298023224),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(50),
-                          ),
+                          color: Colors.black.withOpacity(0.2),
+                          shape: const OvalBorder(),
                         ),
                       ),
                     ),
@@ -86,24 +103,8 @@ class ROnboarding1 extends StatelessWidget {
                 ),
               ),
               const SizedBox(
-                height: 60,
+                height: 133,
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  SkipButton(
-                    onPressed: () {
-                      // Navigate to the NextPage when Skip is pressed
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                const ROnboarding2()), // Replace with desired page
-                      );
-                    },
-                  ),
-                ],
-              )
             ],
           ),
         ),

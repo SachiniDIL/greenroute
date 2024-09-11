@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:greenroute/screens/r_onboarding1.dart';
+import 'package:greenroute/screens/td_onboarding1.dart';
 import 'package:greenroute/theme.dart';
 import 'package:greenroute/widgets/button_small.dart';
 
@@ -15,7 +17,7 @@ class SelectRole extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment
               .stretch, // Stretch widgets horizontally to fill the space
           children: [
-            SizedBox(
+            const SizedBox(
               height: 134,
             ),
             // The Spacer will divide the space equally between the widgets
@@ -45,19 +47,33 @@ class SelectRole extends StatelessWidget {
 
             const Spacer(),
 
-            const Center(
+            Center(
               child: BtnSmall(
                 buttonText: "Resident",
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const ROnboarding1()),
+                  );
+                },
               ),
             ),
 
-            SizedBox(
+            const SizedBox(
               height: 30,
             ),
 
-            const Center(
+            Center(
               child: BtnSmall(
                 buttonText: "Truck Driver",
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const TdOnboarding1()),
+                  );
+                },
               ),
             ),
 

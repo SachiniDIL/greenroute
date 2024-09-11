@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:greenroute/screens/r_onboarding2.dart';
+import 'package:greenroute/screens/td_onboarding2.dart';
 import 'package:greenroute/theme.dart';
 import 'package:greenroute/widgets/skip_button.dart';
 
-class ROnboarding1 extends StatelessWidget {
-  const ROnboarding1({super.key});
+class TdOnboarding1 extends StatelessWidget {
+  const TdOnboarding1({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: "resident onboarding 1",
+      title: "truck driver onboarding 1",
       home: Scaffold(
         body: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -21,23 +21,23 @@ class ROnboarding1 extends StatelessWidget {
                 height: 142,
               ),
               Image.asset(
-                "assets/r_onboarding1.png",
+                "assets/td_onboarding1.png",
                 height: 245,
               ),
               const SizedBox(
                 height: 40,
               ),
               const SizedBox(
-                width: 288,
-                height: 126,
+                width: 267.6,
+                height: 255,
                 child: Text(
-                  "Manage your waste with    ease—track, log, and stay informed.",
+                  "Navigate your route with real-time updates and ease.",
                   style: AppTextStyles.onboardingText,
                   textAlign: TextAlign.center,
                 ),
               ),
               const SizedBox(
-                height: 100,
+                height: 1,
               ),
               SizedBox(
                 width: 55,
@@ -98,7 +98,7 @@ class ROnboarding1 extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                             builder: (context) =>
-                                const ROnboarding2()), // Replace with desired page
+                                const TdOnboarding2()), // Replace with desired page
                       );
                     },
                   ),
