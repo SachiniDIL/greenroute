@@ -40,8 +40,8 @@ class AppTextStyles {
   static const TextStyle topic = TextStyle(
     fontFamily: 'poppins',
     color: AppColors.primaryColor,
-    fontSize: 20,
-    fontWeight: FontWeight.w600,
+    fontSize: 35,
+    fontWeight: FontWeight.w500,
   );
 
   static const TextStyle formText = TextStyle(

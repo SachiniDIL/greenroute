@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:greenroute/screens/r_onboarding1.dart';
 import 'package:greenroute/theme.dart';
 import 'package:greenroute/widgets/button_small.dart';
+
+import 'login_or_signup.dart';
 
 class OnboardingLast extends StatelessWidget {
   const OnboardingLast({super.key});
@@ -49,7 +50,7 @@ class OnboardingLast extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const ROnboarding1()),
+                        builder: (context) => const LoginSignup()),
                   );
                 },
               ),
@@ -103,7 +104,7 @@ class OnboardingLast extends StatelessWidget {
                 ),
               ),
               const SizedBox(
-                height: 133,
+                height: 124,
               ),
             ],
           ),

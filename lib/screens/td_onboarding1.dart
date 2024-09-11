@@ -28,8 +28,8 @@ class TdOnboarding1 extends StatelessWidget {
                 height: 40,
               ),
               const SizedBox(
-                width: 267.6,
-                height: 255,
+                width: 288,
+                height: 126,
                 child: Text(
                   "Navigate your route with real-time updates and ease.",
                   style: AppTextStyles.onboardingText,
@@ -37,7 +37,7 @@ class TdOnboarding1 extends StatelessWidget {
                 ),
               ),
               const SizedBox(
-                height: 1,
+                height: 100,
               ),
               SizedBox(
                 width: 55,
