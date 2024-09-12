@@ -17,8 +17,8 @@ class LoginSignup extends StatelessWidget{
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const SizedBox(
-                height: 148,
+              const Spacer(
+                flex: 2,
               ),
               Center(
                 child: Image.asset(
@@ -84,8 +84,8 @@ class LoginSignup extends StatelessWidget{
                     ),
                 ),
               ),
-              const SizedBox(
-                height: 270,
+              const Spacer(
+                flex: 3,
               ),
             ],
           ),

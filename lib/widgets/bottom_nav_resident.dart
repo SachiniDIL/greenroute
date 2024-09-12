@@ -15,6 +15,7 @@ class BottomNavR extends StatelessWidget{
       height: 75,
       color: AppColors.backgroundSecondColor,
       child: Row(
+
         mainAxisAlignment: MainAxisAlignment.spaceAround, // Space icons evenly
         children: [
           GestureDetector(
@@ -27,30 +28,30 @@ class BottomNavR extends StatelessWidget{
             child: home(current), // Home icon
           ),
           GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const ResidentSchedule()),
-              ); // Navigate to Schedule screen
-            },
+            // onTap: () {
+            //   Navigator.push(
+            //     context,
+            //     MaterialPageRoute(builder: (context) => const ResidentSchedule()),
+            //   ); // Navigate to Schedule screen
+            // },
             child: schedule(current), // Schedule icon
           ),
           GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const ResidentNotification()),
-              ); // Navigate to Notification screen
-            },
+            // onTap: () {
+            //   Navigator.push(
+            //     context,
+            //     MaterialPageRoute(builder: (context) => const ResidentNotification()),
+            //   ); // Navigate to Notification screen
+            // },
             child: notification(current), // Notification icon
           ),
           GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const ResidentProfile()),
-              ); // Navigate to Profile screen
-            },
+            // onTap: () {
+            //   Navigator.push(
+            //     context,
+            //     MaterialPageRoute(builder: (context) => const ResidentProfile()),
+            //   ); // Navigate to Profile screen
+            // },
             child: profile(current), // Profile icon
           ),     // Profile icon
         ],
@@ -69,10 +70,10 @@ class BottomNavR extends StatelessWidget{
 
    Widget schedule(String current){
      if(current == "schedule"){
-       return const RIconTrue(bottomIcon: Icon(Icons.schedule));
+       return const RIconTrue(bottomIcon: Icon(Icons.calendar_month));
      }
      else{
-       return const RIconFalse(bottomIcon: Icon(Icons.schedule));
+       return const RIconFalse(bottomIcon: Icon(Icons.calendar_month));
      }
    }
 
@@ -104,9 +105,12 @@ class RIconTrue extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
     return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(25.0),
+      color: AppColors.primaryColor,
+      ),
       height: 40,
       width: 75,
-      color: AppColors.primaryColor,
       alignment: Alignment.center,
       child: Center(
         child: SizedBox(

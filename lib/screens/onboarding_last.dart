@@ -20,8 +20,8 @@ class OnboardingLast extends StatelessWidget {
             crossAxisAlignment:
                 CrossAxisAlignment.center, // Center horizontally
             children: [
-              const SizedBox(
-                height: 125,
+              const Spacer(
+                flex: 1,
               ),
               Center(
                 child: Image.asset(
@@ -103,8 +103,8 @@ class OnboardingLast extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(
-                height: 124,
+              const Spacer(
+                flex: 1,
               ),
             ],
           ),

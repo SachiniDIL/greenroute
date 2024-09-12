@@ -17,9 +17,7 @@ class ROnboarding1 extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const SizedBox(
-                height: 142,
-              ),
+              const Spacer(flex: 3,),
               Image.asset(
                 "assets/r_onboarding1.png",
                 height: 245,
@@ -85,9 +83,7 @@ class ROnboarding1 extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(
-                height: 60,
-              ),
+              const Spacer(flex: 1,),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -103,7 +99,8 @@ class ROnboarding1 extends StatelessWidget {
                     },
                   ),
                 ],
-              )
+              ),
+              const Spacer(flex: 1,),
             ],
           ),
         ),

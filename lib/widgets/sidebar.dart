@@ -6,62 +6,56 @@ class SideBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return Drawer(
       child: Padding(
         padding: const EdgeInsets.only(top: 31.0, bottom: 31.0, right: 20.0, left: 20.0),
-        child: Column(
+        child: ListView(
           children: [
             GestureDetector(
               onTap: () {
                 Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const Feedback()),
-                );// Navigate to Feedback screen
+                  context,
+                  MaterialPageRoute(builder: (context) => const PlaceholderScreen(title: 'Feedback')), // Navigate to Placeholder screen
+                );
               },
               child: const SideBarMenu(
                 menuText: "Feedback",
                 menuIcon: Icon(Icons.feedback),
               ),
             ),
-            const SizedBox(
-              height: 27,
-            ),
+            const SizedBox(height: 27),
             GestureDetector(
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const Report()),
-                ); // Navigate to Report screen
+                  MaterialPageRoute(builder: (context) => const PlaceholderScreen(title: 'Report')), // Navigate to Placeholder screen
+                );
               },
               child: const SideBarMenu(
                 menuText: "Report",
                 menuIcon: Icon(Icons.report),
               ),
             ),
-            const SizedBox(
-              height: 27,
-            ),
+            const SizedBox(height: 27),
             GestureDetector(
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const Support()),
-                ); // Navigate to Support screen
+                  MaterialPageRoute(builder: (context) => const PlaceholderScreen(title: 'Support')), // Navigate to Placeholder screen
+                );
               },
               child: const SideBarMenu(
                 menuText: "Support",
                 menuIcon: Icon(Icons.support),
               ),
             ),
-            const SizedBox(
-              height: 27,
-            ),
+            const SizedBox(height: 27),
             GestureDetector(
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const Logout()),
-                ); // Navigate to Logout or perform logout
+                  MaterialPageRoute(builder: (context) => const PlaceholderScreen(title: 'Logout')), // Navigate to Placeholder screen
+                );
               },
               child: const SideBarMenu(
                 menuText: "Logout",
@@ -95,9 +89,7 @@ class SideBarMenu extends StatelessWidget {
               color: AppColors.textColor, // Set icon color
             ),
           ),
-          const SizedBox(
-            width: 15,
-          ),
+          const SizedBox(width: 15),
           Text(
             menuText,
             style: const TextStyle(
@@ -108,6 +100,24 @@ class SideBarMenu extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class PlaceholderScreen extends StatelessWidget {
+  final String title;
+
+  const PlaceholderScreen({super.key, required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(title),
+      ),
+      body: Center(
+        child: Text('This is the $title screen'),
       ),
     );
   }

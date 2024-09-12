@@ -3,7 +3,7 @@ import 'package:greenroute/screens/r_onboarding1.dart';
 import 'package:greenroute/screens/td_onboarding1.dart';
 import 'package:greenroute/theme.dart';
 import 'package:greenroute/widgets/button_small.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // Import shared_preferences package
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SelectRole extends StatelessWidget {
   const SelectRole({super.key});
@@ -11,76 +11,85 @@ class SelectRole extends StatelessWidget {
   // Function to save the selected role to SharedPreferences
   Future<void> _saveRole(String role) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('user_role', role); // Store the selected role as 'resident' or 'truck_driver'
+    await prefs.setString('user_role', role);
   }
 
   @override
   Widget build(BuildContext context) {
+    final double screenHeight = MediaQuery.of(context).size.height;
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.center, // Center vertically
-          crossAxisAlignment: CrossAxisAlignment.stretch, // Stretch widgets horizontally to fill the space
-          children: [
-            const SizedBox(
-              height: 134,
-            ),
-            const Spacer(),
-            Center(
-              child: Image.asset(
-                "assets/garbage_truck.png",
-                height: 84,
-              ),
-            ),
-            const Spacer(),
-            const Center(
-              child: Text(
-                'Select Your Role',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: AppColors.textColor,
-                  fontSize: 36,
-                  fontFamily: 'poppins',
-                  fontWeight: FontWeight.w600,
+        body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0), // Add some padding on the sides
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Spacer(flex: 2),
+
+              // Logo or image at the top
+              Flexible(
+                flex: 2,
+                child: Center(
+                  child: Image.asset(
+                    "assets/garbage_truck.png",
+                    height: screenHeight * 0.12, // Adjust based on screen height
+                  ),
                 ),
               ),
-            ),
-            const Spacer(),
-            Center(
-              child: BtnSmall(
-                buttonText: "Resident",
-                onPressed: () async {
-                  // Save role as 'resident' and navigate to Resident Onboarding
-                  await _saveRole('resident');
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const ROnboarding1()),
-                  );
-                },
+
+              // Title text
+              const Flexible(
+                flex: 2,
+                child: Center(
+                  child: Text(
+                    'Select Your Role',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: AppColors.textColor,
+                      fontSize: 28, // Reduce font size to fit on smaller screens
+                      fontFamily: 'poppins',
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(
-              height: 30,
-            ),
-            Center(
-              child: BtnSmall(
-                buttonText: "Truck Driver",
-                onPressed: () async {
-                  // Save role as 'truck_driver' and navigate to Truck Driver Onboarding
-                  await _saveRole('truck_driver');
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const TdOnboarding1()),
-                  );
-                },
+
+
+              // Buttons for selecting role
+              Flexible(
+                flex: 2,
+                child: Column(
+                  children: [
+                    BtnSmall(
+                      buttonText: "Resident",
+                      onPressed: () async {
+                        await _saveRole('resident');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const ROnboarding1()),
+                        );
+                      },
+                    ),
+                    SizedBox(height: screenHeight * 0.03), // Adjust space between buttons
+                    BtnSmall(
+                      buttonText: "Truck Driver",
+                      onPressed: () async {
+                        await _saveRole('truck_driver');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const TdOnboarding1()),
+                        );
+                      },
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const Spacer(),
-            const SizedBox(
-              height: 316,
-            )
-          ],
+
+              const Spacer(flex: 3),
+            ],
+          ),
         ),
       ),
     );
