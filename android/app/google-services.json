@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "113109075606",
+    "project_id": "greenroute-bfc5d",
+    "storage_bucket": "greenroute-bfc5d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:113109075606:android:2fec6b1a2754084d2664b7",
+        "android_client_info": {
+          "package_name": "com.example.greenroute"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCBySV4C1CeParinZnaYx-03T0hCrhMXTo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
