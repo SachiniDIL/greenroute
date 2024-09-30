@@ -4,7 +4,9 @@ import '../theme.dart'; // Assuming you have a theme file where AppColors and Ap
 import 'set_new_pwd.dart'; // Assuming you want to navigate to the SetNewPwd screen after verification
 
 class CheckMail extends StatelessWidget {
-  const CheckMail({super.key});
+  final String userEmail;
+
+  const CheckMail({Key? key, required this.userEmail}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +60,7 @@ class CheckMail extends StatelessWidget {
                       // Navigate to the SetNewPwd page after verification
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const SetNewPwd()),
+                        MaterialPageRoute(builder: (context) => SetNewPwd(userEmail: userEmail)),
                       );
                     },
                   ),

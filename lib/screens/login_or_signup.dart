@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:greenroute/screens/r_login.dart';
+import 'package:greenroute/screens/login.dart';
 import 'package:greenroute/screens/r_signup.dart';
 import 'package:greenroute/screens/td_signup.dart'; // Add the TruckDriver signup screen
 import 'package:greenroute/widgets/button_large.dart';
@@ -61,7 +61,7 @@ class LoginSignup extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const RLoginPage(),
+                        builder: (context) => const LoginPage(),
                       ),
                     );
                   },

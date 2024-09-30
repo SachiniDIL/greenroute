@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:greenroute/screens/select_role.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:greenroute/screens/select_role.dart';
+import 'package:greenroute/screens/resident_home.dart'; // Add the appropriate import for ResidentHome
+import 'package:greenroute/screens/truck_driver_home.dart'; // Add the appropriate import for TruckDriverHome
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,14 +35,38 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
+    _checkLoginStatus(); // Check login status during splash screen
+  }
 
-    // Wait for 800ms and navigate to the SelectRole screen
-    Future.delayed(const Duration(milliseconds: 1000), () {
+  Future<void> _checkLoginStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool? isLoggedIn = prefs.getBool('is_logged_in');
+    String? userRole = prefs.getString('user_role');
+
+    // Simulate a short delay for the splash screen
+    await Future.delayed(const Duration(milliseconds: 1000));
+
+    // Check if the user is logged in
+    if (isLoggedIn == true && userRole != null) {
+      // Navigate to the relevant home page based on the role
+      if (userRole == 'resident') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const ResidentHome()),
+        );
+      } else if (userRole == 'truck_driver') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const TruckDriverHome()),
+        );
+      }
+    } else {
+      // If not logged in, navigate to the role selection screen
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const SelectRole()),
       );
-    });
+    }
   }
 
   @override
@@ -54,3 +81,5 @@ class _SplashScreenState extends State<SplashScreen> {
     );
   }
 }
+
+

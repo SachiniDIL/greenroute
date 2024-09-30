@@ -29,6 +29,59 @@ class _RSignupState extends State<RSignup> {
 
   final _formKey = GlobalKey<FormState>();
 
+  // Method to check if the home address already exists in the database
+  Future<bool> _checkIfAddressExists(String homeAddress) async {
+    final snapshot = await databaseReference
+        .child('users')
+        .orderByChild('homeAddress')
+        .equalTo(homeAddress)
+        .get();
+
+    return snapshot.exists; // Return true if a user with the home address exists
+  }
+
+  // Method to handle sign-up process
+  Future<void> _handleSignUp() async {
+    if (_formKey.currentState!.validate()) {
+      // Get values from input fields
+      String fullName = fullNameController.text;
+      String nic = nicController.text;
+      String mobile = mobileController.text;
+      String email = emailController.text;
+      String password = passwordController.text;
+      String homeAddress = homeAddressController.text;
+      String postalCode = postalCodeController.text;
+
+      // Check if the home address already exists
+      bool addressExists = await _checkIfAddressExists(homeAddress);
+
+      if (addressExists) {
+        // If the home address already exists, show an error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('An account with this home address already exists.')),
+        );
+      } else {
+        // Store data in Firebase Realtime Database
+        await databaseReference.child("users").push().set({
+          'fullName': fullName,
+          'nic': nic,
+          'mobile': mobile,
+          'email': email,
+          'password': password,
+          'homeAddress': homeAddress,
+          'postalCode': postalCode,
+          'role': 'resident'
+        });
+
+        // Navigate to ResidentHome after successful sign-up
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const ResidentHome()),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -157,36 +210,7 @@ class _RSignupState extends State<RSignup> {
                     Center(
                       child: BtnLarge(
                         buttonText: "Sign Up",
-                        onPressed: () async {
-                          if (_formKey.currentState!.validate()) {
-                            // Get values from input fields
-                            String fullName = fullNameController.text;
-                            String nic = nicController.text;
-                            String mobile = mobileController.text;
-                            String email = emailController.text;
-                            String password = passwordController.text;
-                            String homeAddress = homeAddressController.text;
-                            String postalCode = postalCodeController.text;
-
-                            // Store data in Firebase Realtime Database
-                            await databaseReference.child("users").push().set({
-                              'fullName': fullName,
-                              'nic': nic,
-                              'mobile': mobile,
-                              'email': email,
-                              'password': password,
-                              'homeAddress': homeAddress,
-                              'postalCode': postalCode,
-                              'role': 'resident'
-                            });
-
-                            // Navigate to ResidentHome after successful sign-up
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => const ResidentHome()),
-                            );
-                          }
-                        },
+                        onPressed: _handleSignUp,
                       ),
                     ),
                     const SizedBox(height: 60),
