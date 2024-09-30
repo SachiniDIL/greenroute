@@ -20,14 +20,18 @@ class ResidentHome extends StatelessWidget {
           children: [
             // Scrollable content goes here
             SingleChildScrollView(
-              padding: const EdgeInsets.only(top: 127), // Add padding to account for the fixed container height
+              padding: const EdgeInsets.only(top: 127),
+              // Add padding to account for the fixed container height
               child: Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: Column(
                   children: [
-                    const SizedBox(height: 60,),
+                    const SizedBox(
+                      height: 60,
+                    ),
                     const Row(
-                      mainAxisAlignment: MainAxisAlignment.start, // Align the text to the right
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      // Align the text to the right
                       children: [
                         Text(
                           'Upcoming Collection',
@@ -59,7 +63,8 @@ class ResidentHome extends StatelessWidget {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text("Date",
+                            Text(
+                              "Date",
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 color: AppColors.textColor,
@@ -68,7 +73,8 @@ class ResidentHome extends StatelessWidget {
                                 fontWeight: FontWeight.w400,
                               ),
                             ),
-                            Text("Time",
+                            Text(
+                              "Time",
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 color: AppColors.textColor,
@@ -86,7 +92,8 @@ class ResidentHome extends StatelessWidget {
                       height: 41,
                     ),
                     const Row(
-                      mainAxisAlignment: MainAxisAlignment.start, // Align the text to the right
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      // Align the text to the right
                       children: [
                         Text(
                           'Log Garbage Bags',
@@ -116,7 +123,9 @@ class ResidentHome extends StatelessWidget {
                       ),
                       child: const Column(
                         children: [
-                          SizedBox(height: 10,),
+                          SizedBox(
+                            height: 10,
+                          ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
@@ -126,12 +135,14 @@ class ResidentHome extends StatelessWidget {
                                     SizedBox(
                                       height: 60,
                                       width: 60,
-                                      child: Icon(Icons.delete_sharp,
-                                      size: 50,
-                                      color: Color.fromRGBO(12,147,0,1),
+                                      child: Icon(
+                                        Icons.delete_sharp,
+                                        size: 50,
+                                        color: Color.fromRGBO(12, 147, 0, 1),
                                       ),
                                     ),
-                                    Text("0",
+                                    Text(
+                                      "0",
                                       style: TextStyle(
                                         color: AppColors.textColor,
                                         fontSize: 16,
@@ -148,12 +159,14 @@ class ResidentHome extends StatelessWidget {
                                     SizedBox(
                                       height: 60,
                                       width: 60,
-                                      child: Icon(Icons.delete_sharp,
+                                      child: Icon(
+                                        Icons.delete_sharp,
                                         size: 50,
-                                        color: Color.fromRGBO(147,0,0,1),
+                                        color: Color.fromRGBO(147, 0, 0, 1),
                                       ),
                                     ),
-                                    Text("0",
+                                    Text(
+                                      "0",
                                       style: TextStyle(
                                         color: AppColors.textColor,
                                         fontSize: 16,
@@ -170,12 +183,14 @@ class ResidentHome extends StatelessWidget {
                                     SizedBox(
                                       height: 60,
                                       width: 60,
-                                      child: Icon(Icons.delete_sharp,
+                                      child: Icon(
+                                        Icons.delete_sharp,
                                         size: 50,
-                                        color: Color.fromRGBO(0,32,147,1),
+                                        color: Color.fromRGBO(0, 32, 147, 1),
                                       ),
                                     ),
-                                    Text("0",
+                                    Text(
+                                      "0",
                                       style: TextStyle(
                                         color: AppColors.textColor,
                                         fontSize: 16,
@@ -195,11 +210,12 @@ class ResidentHome extends StatelessWidget {
                       height: 80,
                     ),
                     BtnSmall(
-                        buttonText: "Special Request",
+                      buttonText: "Special Request",
                       onPressed: () async {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const TdOnboarding1()),
+                          MaterialPageRoute(
+                              builder: (context) => const TdOnboarding1()),
                         );
                       },
                     ),

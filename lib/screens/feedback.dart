@@ -19,10 +19,11 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
   final TextEditingController subjectController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
 
-  final DatabaseReference _dbRef = FirebaseDatabase.instance.ref().child('feedback');
+  final DatabaseReference _dbRef =
+      FirebaseDatabase.instance.ref().child('feedback');
 
   int _rating = 0;
-  String _userEmail = '';
+  late String _userEmail;
 
   @override
   void initState() {
@@ -106,16 +107,33 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                     const SizedBox(height: 30),
 
                     // Input Fields
-                    CustomTextField(controller: nameController, label: "Name", hint: "Enter your name"),
+                    CustomTextField(
+                        controller: nameController,
+                        label: "Name",
+                        hint: "Enter your name"),
                     const SizedBox(height: 20),
-                    CustomTextField(controller: subjectController, label: "Subject", hint: "Enter subject"),
+                    CustomTextField(
+                        controller: subjectController,
+                        label: "Subject",
+                        hint: "Enter subject"),
                     const SizedBox(height: 20),
-                    CustomTextField(controller: descriptionController, label: "Description", hint: "Enter description", maxLines: 5),
+                    CustomTextField(
+                        controller: descriptionController,
+                        label: "Description",
+                        hint: "Enter description",
+                        maxLines: 5),
                     const SizedBox(height: 30),
 
-                    const Text("Rate Us", style: TextStyle(color: Colors.black, fontSize: 24, fontWeight: FontWeight.w500)),
+                    const Text("Rate Us",
+                        style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 24,
+                            fontWeight: FontWeight.w500)),
                     const SizedBox(height: 10),
-                    StarRating(rating: _rating, onRatingChanged: (newRating) => setState(() => _rating = newRating)),
+                    StarRating(
+                        rating: _rating,
+                        onRatingChanged: (newRating) =>
+                            setState(() => _rating = newRating)),
 
                     const SizedBox(height: 40),
                     SubmitCancelButtons(onSubmit: _submitFeedback),
