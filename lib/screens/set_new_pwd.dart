@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:greenroute/widgets/back_arrow.dart';
 import 'package:greenroute/widgets/button_small.dart';
 import 'package:greenroute/widgets/custom_text_field.dart';
 import 'package:greenroute/utils/validators.dart';
@@ -59,14 +60,7 @@ class _SetNewPwdState extends State<SetNewPwd> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 50),
-              GestureDetector(
-                onTap: () => Navigator.pop(context), // Navigate back
-                child: const Icon(
-                  Icons.arrow_back,
-                  size: 50,
-                  color: AppColors.primaryColor, // Use your defined primary color
-                ),
-              ),
+              BackArrow(),
               const SizedBox(height: 20),
               const Text(
                 "Set New Password",

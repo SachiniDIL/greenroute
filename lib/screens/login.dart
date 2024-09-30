@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/login_service.dart';
+import '../widgets/back_arrow.dart';
 import 'forgot_password.dart'; // Import Forgot Password Page
 import 'resident_home.dart'; // Import Resident Home Page
 import '../theme.dart'; // Import custom theme
@@ -24,18 +25,21 @@ class _LoginPageState extends State<LoginPage> {
 
   final _formKey = GlobalKey<FormState>(); // Form key for validation
 
-  final LoginService _loginService = LoginService(); // Instantiate the login service
+  final LoginService _loginService =
+      LoginService(); // Instantiate the login service
 
   Future<String?> _getUserRole() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString('user_role'); // Retrieve the saved user role
   }
 
-  // Function to save login state to SharedPreferences
-  Future<void> _saveLoginState(bool isLoggedIn, String userRole) async {
+  // Function to save login state and email to SharedPreferences
+  Future<void> _saveLoginState(
+      bool isLoggedIn, String userRole, String email) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setBool('is_logged_in', isLoggedIn); // Save login state
-    await prefs.setString('user_role', userRole);    // Save user role as well
+    await prefs.setString('user_role', userRole); // Save user role
+    await prefs.setString('user_email', email); // Save user's email
   }
 
   Future<void> _login() async {
@@ -55,8 +59,9 @@ class _LoginPageState extends State<LoginPage> {
       );
 
       if (isValidUser) {
-        // Save login status to SharedPreferences
-        await _saveLoginState(true, userRole);  // Save the login state
+        // Save login status and email to SharedPreferences
+        await _saveLoginState(true, userRole,
+            emailController.text); // Save the login state and email
 
         if (userRole == 'resident') {
           // Navigate to Resident Home
@@ -68,7 +73,9 @@ class _LoginPageState extends State<LoginPage> {
           // Navigate to Truck Driver Home (change to appropriate page)
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const ResidentHome()), // Change this to Truck Driver Home
+            MaterialPageRoute(
+                builder: (context) =>
+                    const ResidentHome()), // Change this to Truck Driver Home
           );
         }
       } else {
@@ -80,31 +87,13 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
         children: [
           // Fixed Back Arrow (Non-scrollable)
-          Padding(
-            padding: const EdgeInsets.only(top: 50.0, left: 20.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    Navigator.pop(context); // Go back to previous page
-                  },
-                  child: const Icon(
-                    Icons.arrow_back,
-                    size: 50,
-                    color: AppColors.primaryColor,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          BackArrow(),
 
           // Scrollable Form
           Expanded(
@@ -124,7 +113,8 @@ class _LoginPageState extends State<LoginPage> {
                       controller: emailController,
                       label: "Username or Email",
                       hint: "Enter your username or email",
-                      validator: Validators.validateEmail,  // Use email validator
+                      validator:
+                          Validators.validateEmail, // Use email validator
                     ),
                     const SizedBox(height: 20),
 
@@ -134,13 +124,17 @@ class _LoginPageState extends State<LoginPage> {
                       label: "Password",
                       hint: "Enter your password",
                       obscureText: _obscurePassword,
-                      suffixIcon: _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                      suffixIcon: _obscurePassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
                       onSuffixTap: () {
                         setState(() {
-                          _obscurePassword = !_obscurePassword; // Toggle password visibility
+                          _obscurePassword =
+                              !_obscurePassword; // Toggle password visibility
                         });
                       },
-                      validator: Validators.validatePassword,  // Use password validator
+                      validator:
+                          Validators.validatePassword, // Use password validator
                     ),
                     const SizedBox(height: 10),
 
@@ -149,13 +143,15 @@ class _LoginPageState extends State<LoginPage> {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const ForgotPassword()),
+                          MaterialPageRoute(
+                              builder: (context) => const ForgotPassword()),
                         );
                       },
                       child: const Text(
                         "Forgot Password",
                         style: TextStyle(
-                          color: AppColors.primaryColor, // Custom style for the "Forgot Password" text
+                          color: AppColors.primaryColor,
+                          // Custom style for the "Forgot Password" text
                           fontWeight: FontWeight.bold,
                         ),
                       ),

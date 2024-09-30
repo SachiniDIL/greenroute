@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart'; // Import Firebase Database
 import 'package:greenroute/screens/truck_driver_home.dart';
+import 'package:greenroute/widgets/back_arrow.dart';
 import 'package:greenroute/widgets/button_large.dart';
 import 'package:greenroute/widgets/custom_text_field.dart'; // Custom Text Field Widget
 import '../theme.dart';
@@ -37,24 +38,7 @@ class _TdSignupState extends State<TdSignup> {
       body: Column(
         children: [
           // Fixed Back Arrow (Non-scrollable)
-          Padding(
-            padding: const EdgeInsets.only(top: 50.0, left: 20.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    Navigator.pop(context); // Go back to the previous page
-                  },
-                  child: const Icon(
-                    Icons.arrow_back,
-                    size: 50,
-                    color: AppColors.primaryColor,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          BackArrow(),
 
           // Scrollable Form
           Expanded(

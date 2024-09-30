@@ -1,21 +1,43 @@
 import 'package:flutter/material.dart';
-import 'package:greenroute/theme.dart';
+import 'package:greenroute/screens/feedback.dart';
+import 'package:greenroute/screens/report.dart';
+import 'package:greenroute/screens/support.dart';
+import 'side_bar_menu.dart';
+import '../controllers/loggout_controller.dart'; // Import logout controller
+import 'logout_confirmation_dialog.dart'; // Import the logout confirmation dialog
+import 'package:shared_preferences/shared_preferences.dart'; // Assuming you're using shared_preferences for storing user data
 
-class SideBar extends StatelessWidget {
+class SideBar extends StatefulWidget {
   const SideBar({super.key});
 
   @override
+  _SideBarState createState() => _SideBarState();
+}
+
+class _SideBarState extends State<SideBar> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  // Method to load user email from SharedPreferences (or any other data source)
+
+  @override
   Widget build(BuildContext context) {
+    final loggoutController =
+        LoggoutController(); // Create instance of LoggoutController
+
     return Drawer(
       child: Padding(
-        padding: const EdgeInsets.only(top: 31.0, bottom: 31.0, right: 20.0, left: 20.0),
+        padding: const EdgeInsets.only(
+            top: 31.0, bottom: 31.0, right: 20.0, left: 20.0),
         child: ListView(
           children: [
             GestureDetector(
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const PlaceholderScreen(title: 'Feedback')), // Navigate to Placeholder screen
+                  MaterialPageRoute(builder: (context) => FeedbackScreen()),
                 );
               },
               child: const SideBarMenu(
@@ -28,7 +50,7 @@ class SideBar extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const PlaceholderScreen(title: 'Report')), // Navigate to Placeholder screen
+                  MaterialPageRoute(builder: (context) => const Report()),
                 );
               },
               child: const SideBarMenu(
@@ -41,7 +63,7 @@ class SideBar extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const PlaceholderScreen(title: 'Support')), // Navigate to Placeholder screen
+                  MaterialPageRoute(builder: (context) => const Support()),
                 );
               },
               child: const SideBarMenu(
@@ -52,10 +74,8 @@ class SideBar extends StatelessWidget {
             const SizedBox(height: 27),
             GestureDetector(
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const PlaceholderScreen(title: 'Logout')), // Navigate to Placeholder screen
-                );
+                showLogoutConfirmationDialog(
+                    context, loggoutController); // Show confirmation dialog
               },
               child: const SideBarMenu(
                 menuText: "Logout",
@@ -64,60 +84,6 @@ class SideBar extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class SideBarMenu extends StatelessWidget {
-  final String menuText;
-  final Icon menuIcon;
-
-  const SideBarMenu({super.key, required this.menuText, required this.menuIcon});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Row(
-        children: [
-          SizedBox(
-            width: 27,
-            height: 27,
-            child: Icon(
-              menuIcon.icon, // Access the icon from menuIcon
-              size: 27, // Set icon size
-              color: AppColors.textColor, // Set icon color
-            ),
-          ),
-          const SizedBox(width: 15),
-          Text(
-            menuText,
-            style: const TextStyle(
-              color: AppColors.textColor,
-              fontSize: 16,
-              fontFamily: 'Poppins',
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class PlaceholderScreen extends StatelessWidget {
-  final String title;
-
-  const PlaceholderScreen({super.key, required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-      ),
-      body: Center(
-        child: Text('This is the $title screen'),
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:greenroute/widgets/back_arrow.dart';
 import 'package:greenroute/widgets/button_small.dart';
 import 'package:greenroute/widgets/custom_text_field.dart'; // Reusable custom text field
 import 'package:greenroute/utils/validators.dart'; // Import validators
@@ -53,16 +54,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 50), // Adjust spacing for better UI alignment
-                GestureDetector(
-                  onTap: () {
-                    Navigator.pop(context); // Navigates back to the previous page
-                  },
-                  child: const Icon(
-                    Icons.arrow_back,
-                    size: 50,
-                    color: AppColors.primaryColor, // Use your defined primary color
-                  ),
-                ),
+                BackArrow(),
                 const SizedBox(height: 20),
                 const Text(
                   "Forgot Password",

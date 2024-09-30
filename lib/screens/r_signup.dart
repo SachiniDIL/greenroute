@@ -3,8 +3,9 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:greenroute/screens/resident_home.dart';
 import 'package:greenroute/widgets/button_large.dart';
 import 'package:greenroute/widgets/custom_text_field.dart';
-import 'package:greenroute/utils/validators.dart';  // Import validators
+import 'package:greenroute/utils/validators.dart'; // Import validators
 import '../theme.dart';
+import '../widgets/back_arrow.dart';
 
 class RSignup extends StatefulWidget {
   const RSignup({super.key});
@@ -17,7 +18,8 @@ class _RSignupState extends State<RSignup> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
-  final databaseReference = FirebaseDatabase.instance.ref();  // Firebase database reference
+  final databaseReference =
+      FirebaseDatabase.instance.ref(); // Firebase database reference
 
   final fullNameController = TextEditingController();
   final nicController = TextEditingController();
@@ -37,7 +39,8 @@ class _RSignupState extends State<RSignup> {
         .equalTo(homeAddress)
         .get();
 
-    return snapshot.exists; // Return true if a user with the home address exists
+    return snapshot
+        .exists; // Return true if a user with the home address exists
   }
 
   // Method to handle sign-up process
@@ -58,7 +61,9 @@ class _RSignupState extends State<RSignup> {
       if (addressExists) {
         // If the home address already exists, show an error message
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('An account with this home address already exists.')),
+          const SnackBar(
+              content:
+                  Text('An account with this home address already exists.')),
         );
       } else {
         // Store data in Firebase Realtime Database
@@ -88,24 +93,7 @@ class _RSignupState extends State<RSignup> {
       body: Column(
         children: [
           // Fixed Back Arrow (Non-scrollable)
-          Padding(
-            padding: const EdgeInsets.only(top: 50.0, left: 20.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    Navigator.pop(context); // Go back to previous page
-                  },
-                  child: const Icon(
-                    Icons.arrow_back,
-                    size: 50,
-                    color: AppColors.primaryColor,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          BackArrow(),
 
           // Scrollable Form
           Expanded(
@@ -125,7 +113,8 @@ class _RSignupState extends State<RSignup> {
                       controller: fullNameController,
                       label: "Full Name",
                       hint: "Enter your full name",
-                      validator: (value) => value!.isEmpty ? 'Full Name is required' : null,
+                      validator: (value) =>
+                          value!.isEmpty ? 'Full Name is required' : null,
                     ),
                     const SizedBox(height: 20),
 
@@ -134,7 +123,8 @@ class _RSignupState extends State<RSignup> {
                       controller: nicController,
                       label: "NIC",
                       hint: "Enter your NIC",
-                      validator: (value) => value!.isEmpty ? 'NIC is required' : null,
+                      validator: (value) =>
+                          value!.isEmpty ? 'NIC is required' : null,
                     ),
                     const SizedBox(height: 20),
 
@@ -143,7 +133,8 @@ class _RSignupState extends State<RSignup> {
                       controller: mobileController,
                       label: "Mobile Number",
                       hint: "Enter your mobile number",
-                      validator: Validators.validateMobile,  // Use validator from utils
+                      validator:
+                          Validators.validateMobile, // Use validator from utils
                     ),
                     const SizedBox(height: 20),
 
@@ -152,7 +143,8 @@ class _RSignupState extends State<RSignup> {
                       controller: emailController,
                       label: "Email Address",
                       hint: "Enter your email address",
-                      validator: Validators.validateEmail,  // Use validator from utils
+                      validator:
+                          Validators.validateEmail, // Use validator from utils
                     ),
                     const SizedBox(height: 20),
 
@@ -161,7 +153,8 @@ class _RSignupState extends State<RSignup> {
                       controller: homeAddressController,
                       label: "Home Address",
                       hint: "Enter your home address",
-                      validator: (value) => value!.isEmpty ? 'Home Address is required' : null,
+                      validator: (value) =>
+                          value!.isEmpty ? 'Home Address is required' : null,
                     ),
                     const SizedBox(height: 20),
 
@@ -170,7 +163,8 @@ class _RSignupState extends State<RSignup> {
                       controller: postalCodeController,
                       label: "Postal Code",
                       hint: "Enter your postal code",
-                      validator: Validators.validatePostalCode,  // Use validator from utils
+                      validator: Validators
+                          .validatePostalCode, // Use validator from utils
                     ),
                     const SizedBox(height: 20),
 
@@ -180,13 +174,16 @@ class _RSignupState extends State<RSignup> {
                       label: "Password",
                       hint: "Enter your password",
                       obscureText: _obscurePassword,
-                      suffixIcon: _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                      suffixIcon: _obscurePassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
                       onSuffixTap: () {
                         setState(() {
                           _obscurePassword = !_obscurePassword;
                         });
                       },
-                      validator: Validators.validatePassword,  // Use validator from utils
+                      validator: Validators
+                          .validatePassword, // Use validator from utils
                     ),
                     const SizedBox(height: 20),
 
@@ -196,13 +193,16 @@ class _RSignupState extends State<RSignup> {
                       label: "Confirm Password",
                       hint: "Confirm your password",
                       obscureText: _obscureConfirmPassword,
-                      suffixIcon: _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+                      suffixIcon: _obscureConfirmPassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
                       onSuffixTap: () {
                         setState(() {
                           _obscureConfirmPassword = !_obscureConfirmPassword;
                         });
                       },
-                      validator: (value) => Validators.validateConfirmPassword(value, passwordController.text),
+                      validator: (value) => Validators.validateConfirmPassword(
+                          value, passwordController.text),
                     ),
                     const SizedBox(height: 50),
 

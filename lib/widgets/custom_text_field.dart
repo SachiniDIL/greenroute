@@ -1,6 +1,4 @@
-// lib/widgets/custom_text_field.dart
 import 'package:flutter/material.dart';
-
 import '../theme.dart';
 
 class CustomTextField extends StatelessWidget {
@@ -11,6 +9,7 @@ class CustomTextField extends StatelessWidget {
   final IconData? suffixIcon;
   final VoidCallback? onSuffixTap;
   final String? Function(String?)? validator;
+  final int maxLines; // Add maxLines parameter
 
   const CustomTextField({
     Key? key,
@@ -21,6 +20,7 @@ class CustomTextField extends StatelessWidget {
     this.suffixIcon,
     this.onSuffixTap,
     this.validator,
+    this.maxLines = 1, // Default to 1 line if not provided
   }) : super(key: key);
 
   @override
@@ -33,6 +33,7 @@ class CustomTextField extends StatelessWidget {
         TextFormField(
           controller: controller,
           obscureText: obscureText,
+          maxLines: maxLines, // Use maxLines for multiline input
           decoration: InputDecoration(
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(25.0),
