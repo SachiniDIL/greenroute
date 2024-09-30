@@ -5,6 +5,8 @@ import 'package:greenroute/theme.dart';
 import 'package:greenroute/widgets/button_small.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'login_or_signup.dart';
+
 class SelectRole extends StatelessWidget {
   const SelectRole({super.key});
 
@@ -12,6 +14,12 @@ class SelectRole extends StatelessWidget {
   Future<void> _saveRole(String role) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('user_role', role);
+  }
+
+  // Function to check if the user has completed the onboarding process
+  Future<bool> _checkOnboardingComplete() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('onboarding_complete') ?? false;
   }
 
   @override
@@ -66,10 +74,20 @@ class SelectRole extends StatelessWidget {
                       buttonText: "Resident",
                       onPressed: () async {
                         await _saveRole('resident');
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const ROnboarding1()),
-                        );
+                        bool onboardingComplete = await _checkOnboardingComplete();
+
+                        if(onboardingComplete){
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const LoginSignup())
+                          );
+                        }
+                        else{
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const ROnboarding1()),
+                          );
+                        }
                       },
                     ),
                     SizedBox(height: screenHeight * 0.03), // Adjust space between buttons
@@ -77,10 +95,20 @@ class SelectRole extends StatelessWidget {
                       buttonText: "Truck Driver",
                       onPressed: () async {
                         await _saveRole('truck_driver');
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const TdOnboarding1()),
+                        bool onboardingComplete = await _checkOnboardingComplete();
+
+                        if(onboardingComplete){
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const LoginSignup())
                         );
+                        }
+                        else{
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const TdOnboarding1()),
+                          );
+                        }
                       },
                     ),
                   ],

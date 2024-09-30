@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:greenroute/theme.dart';
 import 'package:greenroute/widgets/button_small.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'login_or_signup.dart';
 
 class OnboardingLast extends StatelessWidget {
   const OnboardingLast({super.key});
+
+  Future<void> _markOnboardingComplete() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('onboarding_complete', true);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +52,9 @@ class OnboardingLast extends StatelessWidget {
               ),
               BtnSmall(
                 buttonText: "Let's get started!",
-                onPressed: () {
+                onPressed: () async {
+                  await _markOnboardingComplete();
+
                   Navigator.push(
                     context,
                     MaterialPageRoute(
