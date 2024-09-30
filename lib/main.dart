@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:greenroute/screens/select_role.dart';
-import 'package:greenroute/screens/resident_home.dart'; // Add the appropriate import for ResidentHome
-import 'package:greenroute/screens/truck_driver_home.dart'; // Add the appropriate import for TruckDriverHome
+import 'package:greenroute/common/screens/select_role.dart';
+import 'package:greenroute/resident/screens/resident_home.dart'; // Add the appropriate import for ResidentHome
+import 'package:greenroute/truck_driver/screens/truck_driver_home.dart'; // Add the appropriate import for TruckDriverHome
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
