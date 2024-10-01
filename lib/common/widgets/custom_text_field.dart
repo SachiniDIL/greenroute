@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../theme.dart';
+import 'package:greenroute/theme.dart';  // Adjust according to your project structure
+
 
 class CustomTextField extends StatelessWidget {
   final TextEditingController controller;
@@ -14,7 +15,7 @@ class CustomTextField extends StatelessWidget {
   final int maxLines; // Add maxLines parameter
 
   const CustomTextField({
-    Key? key,
+    super.key,
     required this.controller,
     required this.label,
     required this.hint,
@@ -24,7 +25,7 @@ class CustomTextField extends StatelessWidget {
     this.validator,
     this.keyboardType = TextInputType.text, // Default keyboard type
     this.maxLines = 1, // Default maxLines
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

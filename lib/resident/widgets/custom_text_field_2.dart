@@ -14,7 +14,7 @@ class CustomTextField2 extends StatelessWidget {
   final bool enabled; // Add enabled parameter
 
   const CustomTextField2({
-    Key? key,
+    super.key,
     required this.controller,
     required this.label,
     required this.hint,
@@ -25,7 +25,7 @@ class CustomTextField2 extends StatelessWidget {
     this.keyboardType = TextInputType.text,
     this.maxLines = 1,
     this.enabled = true, // Default to enabled
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +53,8 @@ class CustomTextField2 extends StatelessWidget {
             obscureText: obscureText,
             keyboardType: keyboardType,
             maxLines: maxLines,
-            enabled: enabled, // Use the enabled parameter
+            enabled: enabled,
+            // Use the enabled parameter
             decoration: InputDecoration(
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(25.0),
@@ -74,12 +75,12 @@ class CustomTextField2 extends StatelessWidget {
               ),
               hintText: hint,
               contentPadding:
-              const EdgeInsets.symmetric(vertical: 12.0, horizontal: 10.0),
+                  const EdgeInsets.symmetric(vertical: 12.0, horizontal: 10.0),
               suffixIcon: suffixIcon != null
                   ? IconButton(
-                icon: Icon(suffixIcon),
-                onPressed: onSuffixTap,
-              )
+                      icon: Icon(suffixIcon),
+                      onPressed: onSuffixTap,
+                    )
                   : null,
             ),
             validator: validator,

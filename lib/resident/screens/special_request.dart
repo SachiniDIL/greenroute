@@ -55,9 +55,11 @@ class _SpecialRequestState extends State<SpecialRequest> {
   // Function to load email from SharedPreferences
   Future<void> _loadUserEmail() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _userEmail = prefs.getString('user_email') ?? 'No email found';
-    });
+    setState(
+      () {
+        _userEmail = prefs.getString('user_email') ?? 'No email found';
+      },
+    );
   }
 
   // Function to select a date with customized colors
@@ -89,12 +91,15 @@ class _SpecialRequestState extends State<SpecialRequest> {
       },
     );
     if (picked != null) {
-      setState(() {
-        requestDateController.text = DateFormat('yyyy-MM-dd').format(picked);
-      });
+      setState(
+        () {
+          requestDateController.text = DateFormat('yyyy-MM-dd').format(picked);
+        },
+      );
     }
   }
 
+  // Function to submit the special request to Firebase
   // Function to submit the special request to Firebase
   Future<void> _submitSPform() async {
     if (requestDateController.text.isEmpty || locationController.text.isEmpty) {
@@ -104,6 +109,7 @@ class _SpecialRequestState extends State<SpecialRequest> {
       return;
     }
 
+    // Store '0' if not selected
     String plasticBags = _plasticSelected ? plasticBagsController.text : '0';
     String paperBags = _paperSelected ? paperBagsController.text : '0';
     String foodWasteBags =
@@ -112,24 +118,30 @@ class _SpecialRequestState extends State<SpecialRequest> {
     try {
       DatabaseReference dbRef =
           FirebaseDatabase.instance.ref().child('special_requests');
-      await dbRef.push().set({
-        'event_name': eventNameController.text,
-        'request_date': requestDateController.text,
-        'location': locationController.text,
-        'plastic_selected': _plasticSelected,
-        'paper_selected': _paperSelected,
-        'food_waste_selected': _foodWasteSelected,
-        'plastic_bags': plasticBags,
-        'paper_bags': paperBags,
-        'food_waste_bags': foodWasteBags,
-        'additional_note': additionalNoteController.text,
-        'user_email': _userEmail,
-      });
+
+      // Storing the request data in Firebase
+      await dbRef.push().set(
+        {
+          'event_name': eventNameController.text,
+          'request_date': requestDateController.text,
+          'location': locationController.text,
+          'plastic_selected': _plasticSelected,
+          'paper_selected': _paperSelected,
+          'food_waste_selected': _foodWasteSelected,
+          'plastic_bags': plasticBags,
+          'paper_bags': paperBags,
+          'food_waste_bags': foodWasteBags,
+          'additional_note': additionalNoteController.text,
+          'user_email': _userEmail, // Store the user's email with the request
+          'status': 'pending', // Set status as 'pending'
+        },
+      );
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Request submitted successfully')),
       );
 
+      // Clear form after submission
       eventNameController.clear();
       requestDateController.clear();
       locationController.clear();
@@ -137,14 +149,18 @@ class _SpecialRequestState extends State<SpecialRequest> {
       paperBagsController.clear();
       foodWasteBagsController.clear();
       additionalNoteController.clear();
-      setState(() {
-        _plasticSelected = false;
-        _paperSelected = false;
-        _foodWasteSelected = false;
-      });
+      setState(
+        () {
+          _plasticSelected = false;
+          _paperSelected = false;
+          _foodWasteSelected = false;
+        },
+      );
 
+      // Clear saved form data
       await SharedPrefHelper.clearFormData();
-      Navigator.pop(context);
+
+      Navigator.pop(context); // Navigate back after successful submission
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error submitting request: $e')),
