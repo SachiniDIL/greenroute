@@ -6,7 +6,7 @@ import 'set_new_pwd.dart'; // Assuming you want to navigate to the SetNewPwd scr
 class CheckMail extends StatelessWidget {
   final String userEmail;
 
-  const CheckMail({Key? key, required this.userEmail}) : super(key: key);
+  const CheckMail({super.key, required this.userEmail});
 
   @override
   Widget build(BuildContext context) {

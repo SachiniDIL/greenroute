@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../theme.dart';
 
 class BackArrow extends StatelessWidget {
-  const BackArrow();
+  const BackArrow({super.key});
 
   @override
   Widget build(BuildContext context) {

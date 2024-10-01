@@ -5,7 +5,7 @@ import 'package:greenroute/common/screens/support.dart';
 import 'side_bar_menu.dart';
 import '../../common/controllers/loggout_controller.dart'; // Import logout controller
 import 'logout_confirmation_dialog.dart'; // Import the logout confirmation dialog
-import 'package:shared_preferences/shared_preferences.dart'; // Assuming you're using shared_preferences for storing user data
+// Assuming you're using shared_preferences for storing user data
 
 class SideBar extends StatefulWidget {
   const SideBar({super.key});

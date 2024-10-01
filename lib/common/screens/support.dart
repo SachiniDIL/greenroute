@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:greenroute/common/widgets/back_arrow.dart';
 
-import '../../theme.dart';
 
 class Support extends StatelessWidget{
   const Support({super.key});

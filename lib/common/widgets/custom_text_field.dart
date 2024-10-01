@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../theme.dart';
 
 class CustomTextField extends StatelessWidget {
@@ -9,6 +10,7 @@ class CustomTextField extends StatelessWidget {
   final IconData? suffixIcon;
   final VoidCallback? onSuffixTap;
   final String? Function(String?)? validator;
+  final TextInputType keyboardType; // Add keyboardType parameter
   final int maxLines; // Add maxLines parameter
 
   const CustomTextField({
@@ -20,7 +22,8 @@ class CustomTextField extends StatelessWidget {
     this.suffixIcon,
     this.onSuffixTap,
     this.validator,
-    this.maxLines = 1, // Default to 1 line if not provided
+    this.keyboardType = TextInputType.text, // Default keyboard type
+    this.maxLines = 1, // Default maxLines
   }) : super(key: key);
 
   @override
@@ -33,7 +36,10 @@ class CustomTextField extends StatelessWidget {
         TextFormField(
           controller: controller,
           obscureText: obscureText,
-          maxLines: maxLines, // Use maxLines for multiline input
+          keyboardType: keyboardType,
+          // Use keyboardType
+          maxLines: maxLines,
+          // Use maxLines
           decoration: InputDecoration(
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(25.0),
@@ -53,12 +59,13 @@ class CustomTextField extends StatelessWidget {
               borderRadius: BorderRadius.circular(25.0),
             ),
             hintText: hint,
-            contentPadding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 10.0),
+            contentPadding:
+                const EdgeInsets.symmetric(vertical: 12.0, horizontal: 10.0),
             suffixIcon: suffixIcon != null
                 ? IconButton(
-              icon: Icon(suffixIcon),
-              onPressed: onSuffixTap,
-            )
+                    icon: Icon(suffixIcon),
+                    onPressed: onSuffixTap,
+                  )
                 : null,
           ),
           validator: validator,
