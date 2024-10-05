@@ -4,7 +4,7 @@ import 'package:greenroute/truck_driver/screens/td_onboarding1.dart';
 import 'package:greenroute/theme.dart';
 import 'package:greenroute/common/widgets/button_small.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import '../../truck_driver/screens/truck_driver_home.dart';
 import 'login_or_signup.dart';
 
 class SelectRole extends StatelessWidget {
@@ -30,11 +30,12 @@ class SelectRole extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0), // Add some padding on the sides
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          // Add some padding on the sides
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Spacer(flex: 2),
+              const Spacer(flex: 1),
 
               // Logo or image at the top
               Flexible(
@@ -42,7 +43,8 @@ class SelectRole extends StatelessWidget {
                 child: Center(
                   child: Image.asset(
                     "assets/garbage_truck.png",
-                    height: screenHeight * 0.12, // Adjust based on screen height
+                    height:
+                        screenHeight * 0.12, // Adjust based on screen height
                   ),
                 ),
               ),
@@ -56,7 +58,8 @@ class SelectRole extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: AppColors.textColor,
-                      fontSize: 28, // Reduce font size to fit on smaller screens
+                      fontSize: 28,
+                      // Reduce font size to fit on smaller screens
                       fontFamily: 'poppins',
                       fontWeight: FontWeight.w600,
                     ),
@@ -64,58 +67,87 @@ class SelectRole extends StatelessWidget {
                 ),
               ),
 
-
               // Buttons for selecting role
               Flexible(
                 flex: 2,
                 child: Column(
                   children: [
-                    BtnSmall(
-                      buttonText: "Resident",
-                      onPressed: () async {
-                        await _saveRole('resident');
-                        bool onboardingComplete = await _checkOnboardingComplete();
+                    Expanded(
+                      child: BtnSmall(
+                        buttonText: "Resident",
+                        onPressed: () async {
+                          await _saveRole('resident');
+                          bool onboardingComplete =
+                              await _checkOnboardingComplete();
 
-                        if(onboardingComplete){
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const LoginSignup())
-                          );
-                        }
-                        else{
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const ROnboarding1()),
-                          );
-                        }
-                      },
+                          if (onboardingComplete) {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const LoginSignup()));
+                          } else {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const ROnboarding1()),
+                            );
+                          }
+                        },
+                      ),
                     ),
-                    SizedBox(height: screenHeight * 0.03), // Adjust space between buttons
-                    BtnSmall(
-                      buttonText: "Truck Driver",
-                      onPressed: () async {
-                        await _saveRole('truck_driver');
-                        bool onboardingComplete = await _checkOnboardingComplete();
+                    SizedBox(height: screenHeight * 0.03),
+                    Expanded(
+                      child: BtnSmall(
+                        buttonText: "Truck Driver",
+                        onPressed: () async {
+                          await _saveRole('truck_driver');
+                          bool onboardingComplete =
+                              await _checkOnboardingComplete();
 
-                        if(onboardingComplete){
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const LoginSignup())
-                        );
-                        }
-                        else{
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const TdOnboarding1()),
-                          );
-                        }
-                      },
+                          if (onboardingComplete) {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const TruckDriverHome()));// TODO
+                          } else {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const TdOnboarding1()),
+                            );
+                          }
+                        },
+                      ),
+                    ),
+                    SizedBox(height: screenHeight * 0.03),
+                    Expanded(
+                      child: BtnSmall(
+                        buttonText: "Disposal Officer",
+                        onPressed: () async {
+                          await _saveRole('disposal_officer');
+                          bool onboardingComplete =
+                              await _checkOnboardingComplete();
+
+                          if (onboardingComplete) {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const LoginSignup()));
+                          } else {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const TdOnboarding1()),
+                            );
+                          }
+                        },
+                      ),
                     ),
                   ],
                 ),
               ),
 
-              const Spacer(flex: 3),
+              const Spacer(flex: 2),
             ],
           ),
         ),

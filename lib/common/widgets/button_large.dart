@@ -5,13 +5,15 @@ class BtnLarge extends StatelessWidget {
   final String buttonText;
   final VoidCallback onPressed;
 
-  // Constructor to accept the text and the function to be called on tap
   const BtnLarge({super.key, required this.buttonText, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onPressed, // This will trigger the provided onPressed function
+      onTap: () {
+        print('Sign-Up Button Pressed');
+        onPressed();
+      },
       child: Column(
         children: [
           SizedBox(
@@ -34,24 +36,19 @@ class BtnLarge extends StatelessWidget {
                         BoxShadow(
                           color: Color.fromARGB(116, 58, 58, 58),
                           blurRadius: 3,
-                          offset: Offset(0,3),
+                          offset: Offset(0, 3),
                           spreadRadius: 0,
                         ),
                       ],
                     ),
                   ),
                 ),
-                Positioned(
-                  left: 91,
-                  top: 12.19,
-                  child: SizedBox(
-                    width: 82,
-                    height: 36.61,
-                    child: Text(
-                      buttonText, // Use the text passed from the constructor
-                      textAlign: TextAlign.center,
-                      style: AppTextStyles.buttonTextLarge,
-                    ),
+                // Use Center to ensure the text fits properly
+                Center(
+                  child: Text(
+                    buttonText,
+                    textAlign: TextAlign.center,
+                    style: AppTextStyles.buttonTextLarge,
                   ),
                 ),
               ],

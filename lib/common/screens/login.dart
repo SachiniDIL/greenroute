@@ -98,7 +98,7 @@ class _LoginPageState extends State<LoginPage> {
           // Scrollable Form
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20.0),
+              padding: const EdgeInsets.all(30.0),
               child: Form(
                 key: _formKey,
                 child: Column(
