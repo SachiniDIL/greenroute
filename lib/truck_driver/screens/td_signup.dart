@@ -161,7 +161,7 @@ class _TdSignupState extends State<TdSignup> {
                             // Navigate to ResidentHome after successful sign-up
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => const TruckDriverHome()),
+                              MaterialPageRoute(builder: (context) => TruckDriverHome()),
                             );
                           }
                         },

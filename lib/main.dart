@@ -57,7 +57,7 @@ class _SplashScreenState extends State<SplashScreen> {
       } else if (userRole == 'truck_driver') {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const TruckDriverHome()),
+          MaterialPageRoute(builder: (context) => TruckDriverHome()),
         );
       }
     } else {
