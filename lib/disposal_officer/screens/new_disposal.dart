@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:greenroute/common/widgets/back_arrow.dart';
 import 'package:greenroute/common/widgets/button_large.dart';
 import 'package:greenroute/theme.dart';
 import 'package:greenroute/common/widgets/custom_text_field.dart';
 import 'package:greenroute/disposal_officer/screens/do_home.dart';
-
-import '../services/disposal_service.dart';
 
 class NewDisposal extends StatefulWidget {
   const NewDisposal({super.key});
@@ -28,7 +28,7 @@ class _NewDisposalState extends State<NewDisposal> {
   String? selectedTruckNumber;
   bool isLoadingTrucksAndDrivers = false;
 
-  final Color pickerPrimaryColor = AppColors.primaryColor;
+  final Color pickerPrimaryColor = AppColors.primaryColor; // Custom color for pickers
 
   @override
   void initState() {
@@ -38,10 +38,23 @@ class _NewDisposalState extends State<NewDisposal> {
 
   Future<void> _fetchMunicipalCouncils() async {
     try {
-      municipalList = await DisposalService.fetchMunicipalCouncils();
-      setState(() {});
+      final response = await http.get(Uri.parse(
+          "https://greenroute-7251d-default-rtdb.firebaseio.com/municipal_council.json"));
+      if (response.statusCode == 200) {
+        dynamic decodedData = json.decode(response.body);
+        if (decodedData is List) {
+          municipalList = List<Map<String, dynamic>>.from(decodedData);
+        } else if (decodedData is Map) {
+          municipalList = List<Map<String, dynamic>>.from(decodedData.values);
+        }
+      } else {
+        throw Exception('Failed to load municipal councils');
+      }
+      setState(() {
+        selectedMunicipalCouncil = null;
+      });
     } catch (e) {
-      print('Error: $e');
+      print('Error fetching municipal councils: $e');
     }
   }
 
@@ -51,13 +64,33 @@ class _NewDisposalState extends State<NewDisposal> {
     });
 
     try {
-      var result = await DisposalService.fetchTruckDriversAndTrucks(councilId);
+      final truckDriverResponse = await http.get(Uri.parse(
+          "https://greenroute-7251d-default-rtdb.firebaseio.com/truck_driver.json?orderBy=%22municipal_council_id%22&equalTo=%22$councilId%22"));
+      final truckResponse = await http.get(Uri.parse(
+          "https://greenroute-7251d-default-rtdb.firebaseio.com/truck.json?orderBy=%22municipal_council_id%22&equalTo=%22$councilId%22"));
 
-      // Use null-aware operator ?? to provide an empty list if null
-      truckDriverList = result['truckDrivers'] ?? [];
-      truckList = result['trucks'] ?? [];
+      if (truckDriverResponse.statusCode == 200 &&
+          truckResponse.statusCode == 200) {
+        dynamic truckDriversDecoded = json.decode(truckDriverResponse.body);
+        dynamic trucksDecoded = json.decode(truckResponse.body);
+
+        setState(() {
+          truckDriverList = truckDriversDecoded is Map
+              ? List<Map<String, dynamic>>.from(truckDriversDecoded.values)
+              : List<Map<String, dynamic>>.from(truckDriversDecoded);
+
+          truckList = trucksDecoded is Map
+              ? List<Map<String, dynamic>>.from(trucksDecoded.values)
+              : List<Map<String, dynamic>>.from(trucksDecoded);
+        });
+
+        selectedTruckDriver = null;
+        selectedTruckNumber = null;
+      } else {
+        throw Exception('Failed to load truck drivers or trucks');
+      }
     } catch (e) {
-      print('Error: $e');
+      print('Error fetching truck drivers and trucks: $e');
     } finally {
       setState(() {
         isLoadingTrucksAndDrivers = false;
@@ -65,6 +98,69 @@ class _NewDisposalState extends State<NewDisposal> {
     }
   }
 
+  Future<void> _saveDisposal(String? municipalCouncil, String? truckDriver,
+      String? truckNumber, String date, String time, String disposalWeight) async {
+    try {
+      if (municipalCouncil == null || truckDriver == null || truckNumber == null) {
+        throw Exception('Required fields are missing');
+      }
+
+      double weight = double.parse(disposalWeight);
+
+      // Fetch the next disposal ID from Firebase
+      final response = await http.get(Uri.parse(
+          "https://greenroute-7251d-default-rtdb.firebaseio.com/disposal.json"));
+
+      String nextDisposalId = _getNextDisposalId(response);
+
+      // Prepare the disposal data
+      final disposalData = {
+        "disposal_id": nextDisposalId,
+        "municipal_council": municipalCouncil,
+        "truck_driver": truckDriver,
+        "truck_number": truckNumber,
+        "date": date,
+        "time": time,
+        "disposal_weight": weight.toString(),
+      };
+
+      // Save the new disposal record
+      final saveResponse = await http.post(
+        Uri.parse("https://greenroute-7251d-default-rtdb.firebaseio.com/disposal.json"),
+        headers: {"Content-Type": "application/json"},
+        body: json.encode(disposalData),
+      );
+
+      if (saveResponse.statusCode != 200 && saveResponse.statusCode != 201) {
+        throw Exception('Failed to save disposal');
+      }
+    } catch (e) {
+      print('Error saving disposal: $e');
+      throw e;
+    }
+  }
+
+  String _getNextDisposalId(http.Response response) {
+    if (response.statusCode == 200) {
+      dynamic decodedData = json.decode(response.body);
+      if (decodedData.isEmpty) {
+        return 'DIS001';
+      } else {
+        List<String> disposalIds = (decodedData as Map)
+            .values
+            .where((disposal) => disposal['disposal_id'] != null)
+            .map<String>((disposal) => disposal['disposal_id'].toString())
+            .toList();
+        disposalIds.sort();
+        String maxDisposalId = disposalIds.last;
+        int currentMaxNumber = int.parse(maxDisposalId.replaceAll('DIS', ''));
+        int nextNumber = currentMaxNumber + 1;
+        return 'DIS${nextNumber.toString().padLeft(3, '0')}';
+      }
+    } else {
+      throw Exception('Failed to load existing disposals');
+    }
+  }
 
   InputDecoration dropdownInputDecoration(String hintText) {
     return InputDecoration(
@@ -114,10 +210,7 @@ class _NewDisposalState extends State<NewDisposal> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 20),
-                    const Text(
-                      "New Disposal",
-                      style: AppTextStyles.topic,
-                    ),
+                    const Text("New Disposal", style: AppTextStyles.topic),
                     const SizedBox(height: 20),
 
                     // Municipal Council Dropdown
@@ -125,10 +218,10 @@ class _NewDisposalState extends State<NewDisposal> {
                       "Municipal Council",
                       "Select Municipal Council",
                       selectedMunicipalCouncil,
-                      municipalList.map((municipal) {
+                      municipalList.map((item) {
                         return DropdownMenuItem<String>(
-                          value: municipal["council_id"].toString(),
-                          child: Text(municipal["council_name"]),
+                          value: item['council_id'].toString(),
+                          child: Text(item['council_name'] ?? 'Unknown'),
                         );
                       }).toList(),
                           (value) {
@@ -149,15 +242,16 @@ class _NewDisposalState extends State<NewDisposal> {
                       "Truck Driver",
                       "Select Truck Driver",
                       selectedTruckDriver,
-                      truckDriverList.map((driver) {
+                      truckDriverList.map((item) {
                         return DropdownMenuItem<String>(
-                          value: driver["emp_id"].toString(),
-                          child: Text(driver["first_name"] + " " + driver["last_name"]),
+                          value: item['emp_id'].toString(),
+                          child: Text("${item['first_name']} ${item['last_name']}"),
                         );
                       }).toList(),
                           (value) => setState(() => selectedTruckDriver = value),
                       isLoadingTrucksAndDrivers: isLoadingTrucksAndDrivers,
                     ),
+
                     const SizedBox(height: 20),
 
                     // Truck Number Dropdown
@@ -165,10 +259,10 @@ class _NewDisposalState extends State<NewDisposal> {
                       "Truck Number",
                       "Select Truck Number",
                       selectedTruckNumber,
-                      truckList.map((truck) {
+                      truckList.map((item) {
                         return DropdownMenuItem<String>(
-                          value: truck["truck_id"].toString(), // Keep this for the value
-                          child: Text(truck["truck_number"]),   // Change this to display truck_number
+                          value: item['truck_id'].toString(),
+                          child: Text(item['truck_number'] ?? 'Unknown'),
                         );
                       }).toList(),
                           (value) => setState(() => selectedTruckNumber = value),
@@ -184,9 +278,27 @@ class _NewDisposalState extends State<NewDisposal> {
                       hint: "Select Date",
                       suffixIcon: Icons.calendar_today,
                       onSuffixTap: () async {
-                        DateTime? pickedDate = await DisposalService.showDatePickerCustom(context, pickerPrimaryColor);
+                        DateTime? pickedDate = await showDatePicker(
+                          context: context,
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime(2020),
+                          lastDate: DateTime(2100),
+                          builder: (context, child) {
+                            return Theme(
+                              data: ThemeData.light().copyWith(
+                                colorScheme: ColorScheme.light(
+                                  primary: pickerPrimaryColor, // Custom primary color
+                                  onPrimary: Colors.white, // Text color when selected
+                                  onSurface: Colors.black, // Default text color
+                                ),
+                              ),
+                              child: child!,
+                            );
+                          },
+                        );
                         if (pickedDate != null) {
-                          dateController.text = "${pickedDate.toLocal()}".split(' ')[0];
+                          dateController.text =
+                          "${pickedDate.toLocal()}".split(' ')[0];
                         }
                       },
                     ),
@@ -199,7 +311,22 @@ class _NewDisposalState extends State<NewDisposal> {
                       hint: "Select Time",
                       suffixIcon: Icons.access_time,
                       onSuffixTap: () async {
-                        TimeOfDay? pickedTime = await DisposalService.showTimePickerCustom(context, pickerPrimaryColor);
+                        TimeOfDay? pickedTime = await showTimePicker(
+                          context: context,
+                          initialTime: TimeOfDay.now(),
+                          builder: (context, child) {
+                            return Theme(
+                              data: ThemeData.light().copyWith(
+                                colorScheme: ColorScheme.light(
+                                  primary: pickerPrimaryColor, // Custom primary color
+                                  onPrimary: Colors.white, // Text color when selected
+                                  onSurface: Colors.black, // Default text color
+                                ),
+                              ),
+                              child: child!,
+                            );
+                          },
+                        );
                         if (pickedTime != null) {
                           timeController.text = pickedTime.format(context);
                         }
@@ -213,7 +340,9 @@ class _NewDisposalState extends State<NewDisposal> {
                       label: "Disposal Weight",
                       hint: "Enter weight",
                       keyboardType: TextInputType.number,
-                      validator: (value) => value == null || value.isEmpty ? 'Please enter the disposal weight' : null,
+                      validator: (value) => value == null || value.isEmpty
+                          ? 'Please enter the disposal weight'
+                          : null,
                     ),
                     const SizedBox(height: 50),
 
@@ -226,7 +355,7 @@ class _NewDisposalState extends State<NewDisposal> {
                           onPressed: () async {
                             if (_formKey.currentState!.validate()) {
                               try {
-                                await DisposalService.saveDisposal(
+                                await _saveDisposal(
                                   selectedMunicipalCouncil,
                                   selectedTruckDriver,
                                   selectedTruckNumber,
@@ -234,22 +363,21 @@ class _NewDisposalState extends State<NewDisposal> {
                                   timeController.text,
                                   disposalWeightController.text,
                                 );
-                                // Show success message
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
+                                  const SnackBar(
                                     content: Text("Disposal saved successfully"),
                                     backgroundColor: Colors.green,
                                   ),
                                 );
 
-                                // Navigate to the DOHome screen after a short delay
-                                await Future.delayed(Duration(seconds: 1));
+                                // Navigate to the DOHome screen
+                                await Future.delayed(const Duration(seconds: 1));
                                 Navigator.pushReplacement(
                                   context,
-                                  MaterialPageRoute(builder: (context) => DOHome()),
+                                  MaterialPageRoute(
+                                      builder: (context) => DOHome()),
                                 );
                               } catch (e) {
-                                // Show error message
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Text("Failed to save disposal: $e"),
@@ -260,7 +388,6 @@ class _NewDisposalState extends State<NewDisposal> {
                             }
                           },
                         ),
-
                       ],
                     ),
                     const SizedBox(height: 50),
@@ -274,7 +401,14 @@ class _NewDisposalState extends State<NewDisposal> {
     );
   }
 
-  Widget _buildDropdown(String label, String hint, String? value, List<DropdownMenuItem<String>> items, Function(String?) onChanged, {bool isLoadingTrucksAndDrivers = false}) {
+  Widget _buildDropdown(
+      String label,
+      String hint,
+      String? value,
+      List<DropdownMenuItem<String>> items,
+      Function(String?) onChanged, {
+        bool isLoadingTrucksAndDrivers = false,
+      }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -286,7 +420,8 @@ class _NewDisposalState extends State<NewDisposal> {
           items: items,
           onChanged: isLoadingTrucksAndDrivers ? null : onChanged,
           validator: (value) => value == null ? 'Please select $label' : null,
-          disabledHint: isLoadingTrucksAndDrivers ? const Text("Loading...") : null,
+          disabledHint:
+          isLoadingTrucksAndDrivers ? const Text("Loading...") : null,
         ),
       ],
     );
