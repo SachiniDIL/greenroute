@@ -59,9 +59,9 @@ class CustomTextField extends StatelessWidget {
               ),
               borderRadius: BorderRadius.circular(25.0),
             ),
-            hintText: hint,
             contentPadding:
                 const EdgeInsets.symmetric(vertical: 12.0, horizontal: 10.0),
+            hintText: hint,
             suffixIcon: suffixIcon != null
                 ? IconButton(
                     icon: Icon(suffixIcon),

@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:greenroute/truck_driver/screens/td_schedule.dart';
 import 'package:greenroute/truck_driver/screens/truck_driver_home.dart';
 
 import '../../theme.dart';
 
-class BottomNavTD extends StatelessWidget {
+class BottomNavDO extends StatelessWidget {
   final String current;
 
-  const BottomNavTD({super.key, required this.current});
+  const BottomNavDO({super.key, required this.current});
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +30,7 @@ class BottomNavTD extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => TDSchedule()),
+                MaterialPageRoute(builder: (context) => TruckDriverHome()),
               ); // Navigate to Schedule screen
             },
             child: schedule(current), // Schedule icon

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:greenroute/common/widgets/custom_table.dart';
+import 'package:greenroute/common/widgets/home_header.dart';
 import 'package:greenroute/theme.dart';
 import 'package:greenroute/truck_driver/widgets/bottom_nav_truck.dart';
 
@@ -17,61 +19,7 @@ class TruckDriverHome extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           SizedBox(
-            child: Column(
-              children: [
-                SizedBox(
-                  height: 39.0,
-                ),
-                Image.asset(
-                  "assets/app_name.png",
-                  height: 39,
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(
-                            width: 144,
-                            height: 23,
-                            child: Text(
-                              'Good Morning,',
-                              style: TextStyle(
-                                color: Color(0xFF054700),
-                                fontSize: 16,
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w600,
-                                height: 0,
-                              ),
-                            ),
-                          ),
-                          SizedBox(
-                            width: 63,
-                            height: 23,
-                            child: Text(
-                              'User',
-                              style: TextStyle(
-                                color: Color(0xFF5EA417),
-                                fontSize: 15,
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w600,
-                                height: 0,
-                              ),
-                            ),
-                          ),
-                          SizedBox(
-                            height: 10.0,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+            child: HomeHeader(),
           ),
           Expanded(
             child: SingleChildScrollView(
@@ -203,7 +151,7 @@ class TruckDriverHome extends StatelessWidget {
                                         color: Colors.white,
                                         shape: RoundedRectangleBorder(
                                           borderRadius:
-                                          BorderRadius.circular(5),
+                                              BorderRadius.circular(5),
                                         ),
                                       ),
                                     ),
@@ -240,9 +188,9 @@ class TruckDriverHome extends StatelessWidget {
                                           width: presentageWidth,
                                           child: Row(
                                             mainAxisAlignment:
-                                            MainAxisAlignment.center,
+                                                MainAxisAlignment.center,
                                             crossAxisAlignment:
-                                            CrossAxisAlignment.center,
+                                                CrossAxisAlignment.center,
                                             children: [
                                               Text(
                                                 "$presentage%",
@@ -318,57 +266,13 @@ class TruckDriverHome extends StatelessWidget {
                             SizedBox(
                               height: 15.0,
                             ),
-                            Table(
-                              columnWidths: const <int, TableColumnWidth>{
-                                0: FixedColumnWidth(80),
-                                1: FlexColumnWidth(),
-                                2: FixedColumnWidth(100),
-                              },
-                              children: [
+                            CustomTable(
+                              rows: [
                                 TableRow(
                                   children: [
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Text(
-                                        "Column1",
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          color: Color(0xFF77767E),
-                                          fontSize: 12,
-                                          fontFamily: 'Inter',
-                                          fontWeight: FontWeight.w400,
-                                          height: 0.16,
-                                        ),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Text(
-                                        "Column2",
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          color: Color(0xFF77767E),
-                                          fontSize: 12,
-                                          fontFamily: 'Inter',
-                                          fontWeight: FontWeight.w400,
-                                          height: 0.16,
-                                        ),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Text(
-                                        "Column3",
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          color: Color(0xFF77767E),
-                                          fontSize: 12,
-                                          fontFamily: 'Inter',
-                                          fontWeight: FontWeight.w400,
-                                          height: 0.16,
-                                        ),
-                                      ),
-                                    ),
+                                    _buildTableCell("001"),
+                                    _buildTableCell("Task 1"),
+                                    _buildTableCell("Medium"),
                                   ],
                                 ),
                                 TableRow(
@@ -466,6 +370,22 @@ class TruckDriverHome extends StatelessWidget {
           ),
           BottomNavTD(current: "home"),
         ],
+      ),
+    );
+  }
+
+  Widget _buildTableCell(String text) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          color: Color(0xFF686868),
+          fontSize: 12,
+          fontFamily: 'Inter',
+          fontWeight: FontWeight.w500,
+        ),
       ),
     );
   }
