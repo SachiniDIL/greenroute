@@ -167,13 +167,14 @@ class _NewDisposalState extends State<NewDisposal> {
                       selectedTruckNumber,
                       truckList.map((truck) {
                         return DropdownMenuItem<String>(
-                          value: truck["truck_id"].toString(),
-                          child: Text(truck["truck_number"]),
+                          value: truck["truck_id"].toString(), // Keep this for the value
+                          child: Text(truck["truck_number"]),   // Change this to display truck_number
                         );
                       }).toList(),
                           (value) => setState(() => selectedTruckNumber = value),
                       isLoadingTrucksAndDrivers: isLoadingTrucksAndDrivers,
                     ),
+
                     const SizedBox(height: 20),
 
                     // Date Picker
