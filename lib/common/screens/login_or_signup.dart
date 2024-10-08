@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:greenroute/common/screens/login.dart';
+import 'package:greenroute/disposal_officer/screens/do_signup.dart';
 import 'package:greenroute/resident/screens/r_signup.dart';
 import 'package:greenroute/truck_driver/screens/td_signup.dart'; // Add the TruckDriver signup screen
 import 'package:greenroute/common/widgets/button_large.dart';
@@ -106,7 +107,16 @@ class LoginSignup extends StatelessWidget {
                           builder: (context) => const TdSignup(),
                         ),
                       );
-                    } else {
+                    } else if (userRole == 'disposal_officer') {
+                      // Navigate to Truck Driver SignUp
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const DOSignup(),
+                        ),
+                      );
+                    }
+                    else {
                       // If no role is selected, you can show an error or default behavior
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(

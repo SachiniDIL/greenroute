@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:greenroute/disposal_officer/screens/do_home.dart';
+import 'package:greenroute/disposal_officer/screens/do_signup.dart';
 import 'package:greenroute/resident/screens/r_onboarding1.dart';
 import 'package:greenroute/truck_driver/screens/td_onboarding1.dart';
 import 'package:greenroute/theme.dart';
@@ -133,7 +134,7 @@ class SelectRole extends StatelessWidget {
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) =>  DOHome()));
+                                    builder: (context) =>  LoginSignup()));
                           } else {
                             Navigator.push(
                               context,
