@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:greenroute/disposal_officer/screens/do_home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:greenroute/common/screens/select_role.dart';
@@ -58,6 +59,11 @@ class _SplashScreenState extends State<SplashScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => TruckDriverHome()),
+        );
+      }else if (userRole == 'disposal_officer') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => DOHome()),
         );
       }
     } else {

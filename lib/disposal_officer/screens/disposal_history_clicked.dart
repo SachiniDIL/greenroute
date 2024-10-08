@@ -13,7 +13,7 @@ class DisposalHistoryClicked extends StatelessWidget {
   final String weight;
 
   const DisposalHistoryClicked({
-    Key? key,
+    super.key,
     required this.truckId,
     required this.truckNumber,
     required this.truckDriverName, // Name instead of ID
@@ -21,7 +21,7 @@ class DisposalHistoryClicked extends StatelessWidget {
     required this.date,
     required this.time,
     required this.weight,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

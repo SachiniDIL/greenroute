@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:greenroute/common/screens/login_or_signup.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:greenroute/resident/screens/resident_home.dart';
 import 'package:greenroute/common/widgets/button_large.dart';
 import 'package:greenroute/common/widgets/custom_text_field.dart';
 import 'package:greenroute/common/utils/validators.dart';
@@ -19,10 +19,12 @@ class _RSignupState extends State<RSignup> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
-  final fullNameController = TextEditingController();
+  final firstNameController = TextEditingController();
+  final lastNameController = TextEditingController();
   final nicController = TextEditingController();
   final mobileController = TextEditingController();
   final emailController = TextEditingController();
+  final usernameController = TextEditingController();
   final passwordController = TextEditingController();
   final homeAddressController = TextEditingController();
   final postalCodeController = TextEditingController();
@@ -30,15 +32,61 @@ class _RSignupState extends State<RSignup> {
   final _formKey = GlobalKey<FormState>();
 
   // URL for your API endpoint
-  final String apiUrl = "https://greenroute-7251d-default-rtdb.firebaseio.com"; // Replace with your actual API URL
+  final String apiUrl =
+      "https://greenroute-7251d-default-rtdb.firebaseio.com/resident.json"; // Replace with your actual Firebase API URL
 
-  // Method to send data to REST API
+  // Method to check if the email or username already exists
+  Future<bool> _checkEmailOrUsernameExists(
+      String email, String username) async {
+    try {
+      var response = await http.get(Uri.parse(apiUrl));
+
+      if (response.statusCode == 200) {
+        Map<String, dynamic> residents = json.decode(response.body);
+        for (var resident in residents.values) {
+          if (resident['email'] == email || resident['username'] == username) {
+            return true; // Email or username already exists
+          }
+        }
+      }
+    } catch (e) {
+      print('Error checking email or username: $e');
+    }
+    return false;
+  }
+
+  // Method to get the next available resident_id
+  Future<String> _getNextResidentId() async {
+    try {
+      var response = await http.get(Uri.parse(apiUrl));
+
+      if (response.statusCode == 200) {
+        Map<String, dynamic> residents = json.decode(response.body);
+        List<String> ids = residents.keys
+            .map((key) => residents[key]['res_id'] as String)
+            .toList();
+
+        if (ids.isNotEmpty) {
+          ids.sort(); // Sort the IDs to find the latest one
+          String lastId = ids.last; // Get the last ID, e.g., "RES003"
+          int nextIdNumber = int.parse(lastId.substring(3)) + 1;
+          return "RES${nextIdNumber.toString().padLeft(3, '0')}"; // Generate next ID, e.g., "RES004"
+        }
+      }
+    } catch (e) {
+      print('Error fetching resident IDs: $e');
+    }
+    return "RES001"; // If no resident IDs exist, return "RES001"
+  }
+
+  // Method to send data to Firebase
   Future<void> _handleSignUp() async {
     if (_formKey.currentState!.validate()) {
       print('Form validated successfully');
 
-      // Get values from input fields
-      String fullName = fullNameController.text;
+      String firstName = firstNameController.text;
+      String lastName = lastNameController.text;
+      String username = usernameController.text;
       String nic = nicController.text;
       String mobile = mobileController.text;
       String email = emailController.text;
@@ -46,20 +94,35 @@ class _RSignupState extends State<RSignup> {
       String homeAddress = homeAddressController.text;
       String postalCode = postalCodeController.text;
 
+      // Check if the email or username already exists
+      bool exists = await _checkEmailOrUsernameExists(email, username);
+      if (exists) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Email or Username already exists")),
+        );
+        return;
+      }
+
+      // Get the next unique resident ID
+      String residentId = await _getNextResidentId();
+
       // Prepare the request payload
       Map<String, String> userData = {
-        'fullName': fullName,
+        'res_id': residentId,
+        'first_name': firstName,
+        'last_name': lastName,
+        'username': username,
         'nic': nic,
-        'mobile': mobile,
+        'phone_number': mobile,
         'email': email,
         'password': password,
-        'homeAddress': homeAddress,
-        'postalCode': postalCode,
-        'role': 'resident'
+        'home_address': homeAddress,
+        'postal_code': postalCode,
+        'role': 'Resident' // Save role as 'Resident'
       };
 
       try {
-        // Send POST request to the API
+        // Send POST request to the Firebase database
         var response = await http.post(
           Uri.parse(apiUrl),
           headers: {
@@ -68,12 +131,12 @@ class _RSignupState extends State<RSignup> {
           body: json.encode(userData),
         );
 
-        if (response.statusCode == 201) {
+        if (response.statusCode == 200) {
           print('User created successfully');
           // Navigate to ResidentHome after successful sign-up
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const ResidentHome()),
+            MaterialPageRoute(builder: (context) => const LoginSignup()),
           );
         } else {
           print('Failed to create user: ${response.body}');
@@ -110,13 +173,33 @@ class _RSignupState extends State<RSignup> {
                     const Text("Sign Up", style: AppTextStyles.topic),
                     const SizedBox(height: 20),
 
-                    // Full Name Field
+                    // First Name Field
                     CustomTextField(
-                      controller: fullNameController,
-                      label: "Full Name",
-                      hint: "Enter your full name",
+                      controller: firstNameController,
+                      label: "First Name",
+                      hint: "Enter your first name",
                       validator: (value) =>
-                      value!.isEmpty ? 'Full Name is required' : null,
+                          value!.isEmpty ? 'First Name is required' : null,
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Last Name Field
+                    CustomTextField(
+                      controller: lastNameController,
+                      label: "Last Name",
+                      hint: "Enter your last name",
+                      validator: (value) =>
+                          value!.isEmpty ? 'Last Name is required' : null,
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Username Field
+                    CustomTextField(
+                      controller: usernameController,
+                      label: "Username",
+                      hint: "Enter your username",
+                      validator: (value) =>
+                          value!.isEmpty ? 'Username is required' : null,
                     ),
                     const SizedBox(height: 20),
 
@@ -126,7 +209,7 @@ class _RSignupState extends State<RSignup> {
                       label: "NIC",
                       hint: "Enter your NIC",
                       validator: (value) =>
-                      value!.isEmpty ? 'NIC is required' : null,
+                          value!.isEmpty ? 'NIC is required' : null,
                     ),
                     const SizedBox(height: 20),
 
@@ -154,7 +237,7 @@ class _RSignupState extends State<RSignup> {
                       label: "Home Address",
                       hint: "Enter your home address",
                       validator: (value) =>
-                      value!.isEmpty ? 'Home Address is required' : null,
+                          value!.isEmpty ? 'Home Address is required' : null,
                     ),
                     const SizedBox(height: 20),
 

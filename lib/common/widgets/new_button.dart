@@ -12,12 +12,12 @@ class BtnNew extends StatelessWidget {
 
   // Constructor to initialize the parameters
   const BtnNew({
-    Key? key,
+    super.key,
     required this.width,
     required this.height,
     required this.buttonText,
     required this.onPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

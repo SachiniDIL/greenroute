@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../common/services/login_service.dart';
+import '../../disposal_officer/screens/do_home.dart';
 import '../widgets/back_arrow.dart';
 import 'forgot_password.dart'; // Import Forgot Password Page
-import '../../resident/screens/resident_home.dart'; // Import Resident Home Page
-import '../../theme.dart'; // Import custom theme
-import '../widgets/button_large.dart'; // Import custom button
-import '../widgets/custom_text_field.dart'; // Import custom text field
-import '../../common/utils/validators.dart'; // Import validators
+import '../../resident/screens/resident_home.dart'; // Resident Home
+import '../../truck_driver/screens/truck_driver_home.dart'; // Truck Driver Home
+import '../../theme.dart'; // Custom theme
+import '../widgets/button_large.dart'; // Custom button
+import '../widgets/custom_text_field.dart'; // Custom text field
+import '../../common/utils/validators.dart'; // Validators
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -18,28 +20,21 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   bool _obscurePassword = true; // Password visibility toggle
-
-  // Controllers for TextFields
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
-
   final _formKey = GlobalKey<FormState>(); // Form key for validation
-
-  final LoginService _loginService =
-      LoginService(); // Instantiate the login service
+  final LoginService _loginService = LoginService(); // Login service
 
   Future<String?> _getUserRole() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString('user_role'); // Retrieve the saved user role
+    return prefs.getString('user_role'); // Retrieve user role
   }
 
-  // Function to save login state and email to SharedPreferences
-  Future<void> _saveLoginState(
-      bool isLoggedIn, String userRole, String email) async {
+  // Save login state and email
+  Future<void> _saveLoginState(String email) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('is_logged_in', isLoggedIn); // Save login state
-    await prefs.setString('user_role', userRole); // Save user role
-    await prefs.setString('user_email', email); // Save user's email
+    await prefs.setBool('isLogged', true); // Save login state as true
+    await prefs.setString('user_email', email); // Save the user's email
   }
 
   Future<void> _login() async {
@@ -52,36 +47,45 @@ class _LoginPageState extends State<LoginPage> {
         return;
       }
 
-      // Use LoginService to validate the credentials
-      bool isValidUser = await _loginService.validateUser(
+      // Use LoginService to validate the credentials and retrieve the email
+      String? userEmail = await _loginService.validateUser(
         emailController.text,
         passwordController.text,
       );
 
-      if (isValidUser) {
-        // Save login status and email to SharedPreferences
-        await _saveLoginState(true, userRole,
-            emailController.text); // Save the login state and email
+      if (userEmail != null) {
+        // Save login state and the user's email
+        await _saveLoginState(userEmail);
 
+        // Show success SnackBar with green background
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Login successful!"),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        // Navigate to the correct home screen based on user role
         if (userRole == 'resident') {
-          // Navigate to Resident Home
-          Navigator.push(
+          Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const ResidentHome()),
           );
         } else if (userRole == 'truck_driver') {
-          // Navigate to Truck Driver Home (change to appropriate page)
-          Navigator.push(
+          Navigator.pushReplacement(
             context,
-            MaterialPageRoute(
-                builder: (context) =>
-                    const ResidentHome()), // Change this to Truck Driver Home
+            MaterialPageRoute(builder: (context) => TruckDriverHome()),
+          );
+        } else if (userRole == 'disposal_officer') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => DOHome()),
           );
         }
       } else {
         // Show error message if login fails
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Invalid email or password")),
+          const SnackBar(content: Text("Invalid username/email or password")),
         );
       }
     }
@@ -92,10 +96,7 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       body: Column(
         children: [
-          // Fixed Back Arrow (Non-scrollable)
           BackArrow(),
-
-          // Scrollable Form
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(30.0),
@@ -107,58 +108,43 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(height: 20),
                     const Text("Sign In", style: AppTextStyles.topic),
                     const SizedBox(height: 40),
-
-                    // Username or Email Field
                     CustomTextField(
                       controller: emailController,
                       label: "Username or Email",
                       hint: "Enter your username or email",
-                      validator:
-                          Validators.validateEmail, // Use email validator
+                      validator: (value) => Validators.validateEmailOrUsername(value),
                     ),
                     const SizedBox(height: 20),
-
-                    // Password Field with Eye Icon
                     CustomTextField(
                       controller: passwordController,
                       label: "Password",
                       hint: "Enter your password",
                       obscureText: _obscurePassword,
-                      suffixIcon: _obscurePassword
-                          ? Icons.visibility_off
-                          : Icons.visibility,
+                      suffixIcon: _obscurePassword ? Icons.visibility_off : Icons.visibility,
                       onSuffixTap: () {
                         setState(() {
-                          _obscurePassword =
-                              !_obscurePassword; // Toggle password visibility
+                          _obscurePassword = !_obscurePassword; // Toggle password visibility
                         });
                       },
-                      validator:
-                          Validators.validatePassword, // Use password validator
+                      validator: Validators.validatePassword,
                     ),
                     const SizedBox(height: 10),
-
-                    // Forgot Password Link
                     GestureDetector(
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(
-                              builder: (context) => const ForgotPassword()),
+                          MaterialPageRoute(builder: (context) => const ForgotPassword()),
                         );
                       },
                       child: const Text(
                         "Forgot Password",
                         style: TextStyle(
                           color: AppColors.primaryColor,
-                          // Custom style for the "Forgot Password" text
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
                     const SizedBox(height: 20),
-
-                    // Sign In Button
                     Center(
                       child: BtnLarge(
                         buttonText: "Sign In",

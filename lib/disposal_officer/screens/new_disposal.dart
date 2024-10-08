@@ -18,7 +18,8 @@ class _NewDisposalState extends State<NewDisposal> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController dateController = TextEditingController();
   final TextEditingController timeController = TextEditingController();
-  final TextEditingController disposalWeightController = TextEditingController();
+  final TextEditingController disposalWeightController =
+      TextEditingController();
 
   List<Map<String, dynamic>> municipalList = [];
   List<Map<String, dynamic>> truckDriverList = [];
@@ -28,7 +29,8 @@ class _NewDisposalState extends State<NewDisposal> {
   String? selectedTruckNumber;
   bool isLoadingTrucksAndDrivers = false;
 
-  final Color pickerPrimaryColor = AppColors.primaryColor; // Custom color for pickers
+  final Color pickerPrimaryColor =
+      AppColors.primaryColor; // Custom color for pickers
 
   @override
   void initState() {
@@ -98,10 +100,17 @@ class _NewDisposalState extends State<NewDisposal> {
     }
   }
 
-  Future<void> _saveDisposal(String? municipalCouncil, String? truckDriver,
-      String? truckNumber, String date, String time, String disposalWeight) async {
+  Future<void> _saveDisposal(
+      String? municipalCouncil,
+      String? truckDriver,
+      String? truckNumber,
+      String date,
+      String time,
+      String disposalWeight) async {
     try {
-      if (municipalCouncil == null || truckDriver == null || truckNumber == null) {
+      if (municipalCouncil == null ||
+          truckDriver == null ||
+          truckNumber == null) {
         throw Exception('Required fields are missing');
       }
 
@@ -126,7 +135,8 @@ class _NewDisposalState extends State<NewDisposal> {
 
       // Save the new disposal record
       final saveResponse = await http.post(
-        Uri.parse("https://greenroute-7251d-default-rtdb.firebaseio.com/disposal.json"),
+        Uri.parse(
+            "https://greenroute-7251d-default-rtdb.firebaseio.com/disposal.json"),
         headers: {"Content-Type": "application/json"},
         body: json.encode(disposalData),
       );
@@ -136,7 +146,7 @@ class _NewDisposalState extends State<NewDisposal> {
       }
     } catch (e) {
       print('Error saving disposal: $e');
-      throw e;
+      rethrow;
     }
   }
 
@@ -182,7 +192,8 @@ class _NewDisposalState extends State<NewDisposal> {
         borderRadius: BorderRadius.circular(25.0),
       ),
       hintText: hintText,
-      contentPadding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 10.0),
+      contentPadding:
+          const EdgeInsets.symmetric(vertical: 12.0, horizontal: 10.0),
       isDense: true, // Ensures the height is compact and consistent
     );
   }
@@ -224,7 +235,7 @@ class _NewDisposalState extends State<NewDisposal> {
                           child: Text(item['council_name'] ?? 'Unknown'),
                         );
                       }).toList(),
-                          (value) {
+                      (value) {
                         setState(() {
                           selectedMunicipalCouncil = value;
                           selectedTruckDriver = null;
@@ -245,10 +256,11 @@ class _NewDisposalState extends State<NewDisposal> {
                       truckDriverList.map((item) {
                         return DropdownMenuItem<String>(
                           value: item['emp_id'].toString(),
-                          child: Text("${item['first_name']} ${item['last_name']}"),
+                          child: Text(
+                              "${item['first_name']} ${item['last_name']}"),
                         );
                       }).toList(),
-                          (value) => setState(() => selectedTruckDriver = value),
+                      (value) => setState(() => selectedTruckDriver = value),
                       isLoadingTrucksAndDrivers: isLoadingTrucksAndDrivers,
                     ),
 
@@ -265,7 +277,7 @@ class _NewDisposalState extends State<NewDisposal> {
                           child: Text(item['truck_number'] ?? 'Unknown'),
                         );
                       }).toList(),
-                          (value) => setState(() => selectedTruckNumber = value),
+                      (value) => setState(() => selectedTruckNumber = value),
                       isLoadingTrucksAndDrivers: isLoadingTrucksAndDrivers,
                     ),
 
@@ -287,8 +299,10 @@ class _NewDisposalState extends State<NewDisposal> {
                             return Theme(
                               data: ThemeData.light().copyWith(
                                 colorScheme: ColorScheme.light(
-                                  primary: pickerPrimaryColor, // Custom primary color
-                                  onPrimary: Colors.white, // Text color when selected
+                                  primary: pickerPrimaryColor,
+                                  // Custom primary color
+                                  onPrimary: Colors.white,
+                                  // Text color when selected
                                   onSurface: Colors.black, // Default text color
                                 ),
                               ),
@@ -298,7 +312,7 @@ class _NewDisposalState extends State<NewDisposal> {
                         );
                         if (pickedDate != null) {
                           dateController.text =
-                          "${pickedDate.toLocal()}".split(' ')[0];
+                              "${pickedDate.toLocal()}".split(' ')[0];
                         }
                       },
                     ),
@@ -318,8 +332,10 @@ class _NewDisposalState extends State<NewDisposal> {
                             return Theme(
                               data: ThemeData.light().copyWith(
                                 colorScheme: ColorScheme.light(
-                                  primary: pickerPrimaryColor, // Custom primary color
-                                  onPrimary: Colors.white, // Text color when selected
+                                  primary: pickerPrimaryColor,
+                                  // Custom primary color
+                                  onPrimary: Colors.white,
+                                  // Text color when selected
                                   onSurface: Colors.black, // Default text color
                                 ),
                               ),
@@ -365,13 +381,15 @@ class _NewDisposalState extends State<NewDisposal> {
                                 );
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                    content: Text("Disposal saved successfully"),
+                                    content:
+                                        Text("Disposal saved successfully"),
                                     backgroundColor: Colors.green,
                                   ),
                                 );
 
                                 // Navigate to the DOHome screen
-                                await Future.delayed(const Duration(seconds: 1));
+                                await Future.delayed(
+                                    const Duration(seconds: 1));
                                 Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
@@ -380,7 +398,8 @@ class _NewDisposalState extends State<NewDisposal> {
                               } catch (e) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: Text("Failed to save disposal: $e"),
+                                    content:
+                                        Text("Failed to save disposal: $e"),
                                     backgroundColor: Colors.red,
                                   ),
                                 );
@@ -402,13 +421,13 @@ class _NewDisposalState extends State<NewDisposal> {
   }
 
   Widget _buildDropdown(
-      String label,
-      String hint,
-      String? value,
-      List<DropdownMenuItem<String>> items,
-      Function(String?) onChanged, {
-        bool isLoadingTrucksAndDrivers = false,
-      }) {
+    String label,
+    String hint,
+    String? value,
+    List<DropdownMenuItem<String>> items,
+    Function(String?) onChanged, {
+    bool isLoadingTrucksAndDrivers = false,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -421,7 +440,7 @@ class _NewDisposalState extends State<NewDisposal> {
           onChanged: isLoadingTrucksAndDrivers ? null : onChanged,
           validator: (value) => value == null ? 'Please select $label' : null,
           disabledHint:
-          isLoadingTrucksAndDrivers ? const Text("Loading...") : null,
+              isLoadingTrucksAndDrivers ? const Text("Loading...") : null,
         ),
       ],
     );

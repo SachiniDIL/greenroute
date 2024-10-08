@@ -17,7 +17,8 @@ class ForgotPassword extends StatefulWidget {
 class _ForgotPasswordState extends State<ForgotPassword> {
   final _formKey = GlobalKey<FormState>(); // Form key for validation
   final TextEditingController _emailController = TextEditingController();
-  final ForgotPasswordService _forgotPasswordService = ForgotPasswordService(); // Instantiate the service
+  final ForgotPasswordService _forgotPasswordService =
+  ForgotPasswordService(); // Instantiate the service
 
   // Method to handle the reset password request
   Future<void> _resetPassword() async {
@@ -36,7 +37,9 @@ class _ForgotPasswordState extends State<ForgotPassword> {
       } else {
         // Show an error message if the email does not exist in the database
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("The email entered does not exist in our records.")),
+          const SnackBar(
+              content:
+              Text("The email entered does not exist in our records.")),
         );
       }
     }
@@ -45,59 +48,66 @@ class _ForgotPasswordState extends State<ForgotPassword> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Form(
-            key: _formKey, // Assign the form key
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 50), // Adjust spacing for better UI alignment
-                BackArrow(),
-                const SizedBox(height: 20),
-                const Text(
-                  "Forgot Password",
-                  style: AppTextStyles.topic, // Custom text style from your theme
-                ),
-                const SizedBox(height: 20),
-                const Text(
-                  "Please enter your email to reset the password.",
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 15,
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w400,
-                    height: 0.09,
-                    letterSpacing: -0.50,
+      body: Column(
+        children: [
+          BackArrow(),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(30.0),
+                child: Form(
+                  key: _formKey, // Assign the form key
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 20),
+                      const Text(
+                        "Forgot Password",
+                        style: AppTextStyles
+                            .topic, // Custom text style from your theme
+                      ),
+                      const SizedBox(height: 40),
+                      const Text(
+                        "Please enter your email to reset the password.",
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 15,
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w400,
+                          height: 0.09,
+                          letterSpacing: -0.50,
+                        ),
+                      ),
+                      const SizedBox(height: 40),
+
+                      // Email Input Field using CustomTextField
+                      CustomTextField(
+                        controller: _emailController,
+                        label: "Email",
+                        hint: "Enter your email",
+                        validator: Validators
+                            .validateEmail, // Use the email validator from validators.dart
+                      ),
+
+                      const SizedBox(height: 30),
+
+                      // Reset Password Button
+                      Center(
+                        child: BtnSmall(
+                          buttonText: "Reset Password",
+                          onPressed: () {
+                            _resetPassword(); // Call the reset password method
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 30),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 40),
-
-                // Email Input Field using CustomTextField
-                CustomTextField(
-                  controller: _emailController,
-                  label: "Email",
-                  hint: "Enter your email",
-                  validator: Validators.validateEmail, // Use the email validator from validators.dart
-                ),
-
-                const SizedBox(height: 30),
-
-                // Reset Password Button
-                Center(
-                  child: BtnSmall(
-                    buttonText: "Reset Password",
-                    onPressed: () {
-                      _resetPassword();  // Call the reset password method
-                    },
-                  ),
-                ),
-                const SizedBox(height: 30),
-              ],
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }

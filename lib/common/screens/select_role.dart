@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:greenroute/disposal_officer/screens/do_home.dart';
-import 'package:greenroute/disposal_officer/screens/do_signup.dart';
 import 'package:greenroute/resident/screens/r_onboarding1.dart';
 import 'package:greenroute/truck_driver/screens/td_onboarding1.dart';
 import 'package:greenroute/theme.dart';
 import 'package:greenroute/common/widgets/button_small.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../truck_driver/screens/truck_driver_home.dart';
+import '../../disposal_officer/screens/DO_onboarding1.dart';
 import 'login_or_signup.dart';
 
 class SelectRole extends StatelessWidget {
@@ -110,7 +108,7 @@ class SelectRole extends StatelessWidget {
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => TruckDriverHome()));// TODO
+                                    builder: (context) => LoginSignup()));// TODO
                           } else {
                             Navigator.push(
                               context,
@@ -139,7 +137,7 @@ class SelectRole extends StatelessWidget {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => const TdOnboarding1()),
+                                  builder: (context) => const DoOnboarding1()),
                             );
                           }
                         },

@@ -1,5 +1,3 @@
-
-
 class Validators {
   static String? validateEmail(String? value) {
     if (value == null || value.isEmpty) {
@@ -52,5 +50,24 @@ class Validators {
     return null;
   }
 
+  // New method to validate either an email or a username
+  static String? validateEmailOrUsername(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Username or email is required';
+    }
 
+    // Check if it matches an email pattern
+    final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
+    if (emailRegex.hasMatch(value)) {
+      return null; // Valid email
+    }
+
+    // Check if it's a valid username (e.g., must not contain special characters)
+    final usernameRegex = RegExp(r'^[a-zA-Z0-9_]+$');
+    if (!usernameRegex.hasMatch(value)) {
+      return 'Enter a valid email or username';
+    }
+
+    return null;
+  }
 }

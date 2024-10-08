@@ -1,47 +1,64 @@
-import 'package:firebase_database/firebase_database.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginService {
-  final DatabaseReference databaseReference = FirebaseDatabase.instance.ref();
+  final String baseUrl =
+      "https://greenroute-7251d-default-rtdb.firebaseio.com";
 
-  Future<bool> validateUser(String email, String password) async {
+  // Validate user credentials based on role (resident, truck_driver, disposal_officer)
+  Future<String?> validateUser(String emailOrUsername, String password) async {
     // Get user role from SharedPreferences
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userRole = prefs.getString('user_role');
 
     if (userRole == null) {
       // User role not set
-      return false;
+      return null;
+    }
+
+    String node;
+    if (userRole == 'resident') {
+      node = 'resident'; // Check in 'resident' node
+    } else if (userRole == 'truck_driver') {
+      node =
+          'truck_driver'; // Check in 'truck_driver' node where signup is true
+    } else if (userRole == 'disposal_officer') {
+      node =
+          'disposal_officer'; // Check in 'disposal_officer' node where signup is true
+    } else {
+      return null; // Invalid user role
     }
 
     try {
-      // Query the database based on the user role (resident or truck_driver)
-      final role = userRole == 'resident' ? 'resident' : 'truckdriver';
+      // Fetch data from the respective node
+      final response = await http.get(Uri.parse('$baseUrl/$node.json'));
 
-      // Query the database for the email, password, and role
-      final snapshot = await databaseReference
-          .child('users')
-          .orderByChild('email')
-          .equalTo(email)
-          .once();
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body) as Map<String, dynamic>;
+        for (var entry in data.entries) {
+          final user = entry.value;
 
-      // Check if the user exists and their credentials match
-      if (snapshot.snapshot.value != null) {
-        final users = Map<String, dynamic>.from(snapshot.snapshot.value as Map);
-        for (var user in users.values) {
-          if (user['password'] == password && user['role'] == role) {
-            // Login successful
-            return true;
+          // Check email or username match
+          if ((user['email'] == emailOrUsername ||
+              user['username'] == emailOrUsername)) {
+            // For truck_driver and disposal_officer, ensure signup is true
+            if (userRole != 'resident' && user['signup'] != true) {
+              continue;
+            }
+
+            // Check password match
+            if (user['password'] == password) {
+              return user['email']; // Return valid user's email
+            }
           }
         }
       }
 
-      // No matching user found
-      return false;
+      return null; // No valid user found
     } catch (e) {
-      // Error occurred while querying the database
       print('Error validating user: $e');
-      return false;
+      return null;
     }
   }
 }

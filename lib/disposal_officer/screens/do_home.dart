@@ -10,7 +10,7 @@ import '../widgets/bottom_nav_do.dart';
 import 'new_disposal.dart';
 
 class DOHome extends StatefulWidget {
-  DOHome({super.key});
+  const DOHome({super.key});
 
   @override
   _DOHomeState createState() => _DOHomeState();

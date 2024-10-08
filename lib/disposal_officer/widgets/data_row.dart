@@ -5,10 +5,10 @@ class DataRowWidget extends StatelessWidget {
   final String data;
 
   const DataRowWidget({
-    Key? key,
+    super.key,
     required this.description,
     required this.data,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
