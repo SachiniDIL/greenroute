@@ -1,25 +1,56 @@
 import 'package:flutter/material.dart';
-import 'package:greenroute/common/widgets/custom_table.dart';
 import 'package:greenroute/common/widgets/home_header.dart';
 import 'package:greenroute/theme.dart';
-import 'package:greenroute/truck_driver/widgets/bottom_nav_truck.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../common/widgets/custom_table.dart';
 import '../../common/widgets/new_button.dart';
+import '../widgets/bottom_nav_truck.dart';
 
-class TruckDriverHome extends StatelessWidget {
-  TruckDriverHome({super.key}); // Removed the const here
+class TruckDriverHome extends StatefulWidget {
+  TruckDriverHome({super.key});
 
-  double presentage = 59; // Example percentage
+  @override
+  _TruckDriverHomeState createState() => _TruckDriverHomeState();
+}
+
+class _TruckDriverHomeState extends State<TruckDriverHome> {
+  String? userRole;
+  String? userEmail;
+  bool isLoading = true;
+  double precentage = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  // Method to load user_role and user_email from SharedPreferences
+  Future<void> _loadUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userRole = prefs.getString('user_role');
+      userEmail = prefs.getString('user_email');
+      isLoading = false; // Set loading to false once data is fetched
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return Center(child: CircularProgressIndicator(color: AppColors.primaryColor,));
+    }
     return Scaffold(
       backgroundColor: AppColors.backgroundSecondColor,
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+      body: isLoading
+          ? Center(child: CircularProgressIndicator()) // Show loader
+          : Column(
         children: [
           SizedBox(
-            child: HomeHeader(),
+            child: HomeHeader(
+              userRole: userRole ?? "Guest",
+              userEmail: userEmail ?? "Not Available",
+            ),
           ),
           Expanded(
             child: SingleChildScrollView(
@@ -140,7 +171,7 @@ class TruckDriverHome extends StatelessWidget {
                               builder: (context, constraints) {
                                 double totalWidth = constraints.maxWidth;
                                 double presentageWidth =
-                                    (totalWidth * presentage) / 100;
+                                    (totalWidth * precentage) / 100;
 
                                 return Stack(
                                   children: [
@@ -151,7 +182,7 @@ class TruckDriverHome extends StatelessWidget {
                                         color: Colors.white,
                                         shape: RoundedRectangleBorder(
                                           borderRadius:
-                                              BorderRadius.circular(5),
+                                          BorderRadius.circular(5),
                                         ),
                                       ),
                                     ),
@@ -188,12 +219,12 @@ class TruckDriverHome extends StatelessWidget {
                                           width: presentageWidth,
                                           child: Row(
                                             mainAxisAlignment:
-                                                MainAxisAlignment.center,
+                                            MainAxisAlignment.center,
                                             crossAxisAlignment:
-                                                CrossAxisAlignment.center,
+                                            CrossAxisAlignment.center,
                                             children: [
                                               Text(
-                                                "$presentage%",
+                                                "$precentage%",
                                                 textAlign: TextAlign.center,
                                                 style: TextStyle(
                                                   color: Colors.white,

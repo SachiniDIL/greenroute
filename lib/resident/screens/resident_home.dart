@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:firebase_database/firebase_database.dart';
-import 'package:greenroute/resident/screens/log_garbage_bags.dart';
-import 'package:greenroute/resident/screens/special_request.dart';
+import 'package:greenroute/common/widgets/new_button.dart';
 import 'package:greenroute/theme.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // Import for SharedPreferences
+import '../../common/widgets/home_header.dart';
 import '../widgets/bottom_nav_resident.dart';
-import '../../common/widgets/button_small.dart';
-import '../../common/widgets/sidebar.dart';
+import 'emergency.dart';
 
 class ResidentHome extends StatefulWidget {
   const ResidentHome({super.key});
@@ -16,325 +14,134 @@ class ResidentHome extends StatefulWidget {
 }
 
 class _ResidentHomeState extends State<ResidentHome> {
-  int plasticBags = 0;
-  int paperBags = 0;
-  int foodBags = 0;
-  String firstName = ''; // Variable to hold the first name
+  String? userRole;
+  String? userEmail;
+  bool isLoading = true; // Add a loading state
 
   @override
   void initState() {
     super.initState();
-    _loadUserData();
+    _loadUserData(); // Load user data when the widget is initialized
   }
 
-  // Function to load user data from SharedPreferences and Firebase
+  // Method to load user_role and user_email from SharedPreferences
   Future<void> _loadUserData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? userEmail = prefs.getString('user_email');
-    if (userEmail != null) {
-      _fetchGarbageLog(userEmail);
-      _fetchUserName(userEmail); // Fetch the user name (first name)
-    }
-  }
-
-  // Fetch user data from Firebase to get the first name
-  Future<void> _fetchUserName(String userEmail) async {
-    DatabaseReference dbRef = FirebaseDatabase.instance.ref().child('users');
-    Query query = dbRef.orderByChild('email').equalTo(userEmail);
-
-    DataSnapshot snapshot = await query.get();
-    if (snapshot.exists) {
-      final userData = Map<dynamic, dynamic>.from(snapshot.value as Map);
-      if (userData.isNotEmpty) {
-        final userEntry = userData.values.first as Map<dynamic, dynamic>;
-        String fullName = userEntry['fullName'] ?? '';
-        setState(() {
-          firstName = fullName.split(' ')[0]; // Get the first name
-        });
-      }
-    }
-  }
-
-  // Fetch garbage logs from Firebase
-  Future<void> _fetchGarbageLog(String userEmail) async {
-    DatabaseReference dbRef =
-    FirebaseDatabase.instance.ref().child('garbage_logs');
-    Query query = dbRef.orderByChild('user_email').equalTo(userEmail);
-
-    DataSnapshot snapshot = await query.get();
-    if (snapshot.exists) {
-      // Cast the snapshot value to Map<dynamic, dynamic>
-      final logEntries = Map<dynamic, dynamic>.from(snapshot.value as Map);
-      if (logEntries.isNotEmpty) {
-        // Cast the first entry properly
-        final firstEntry = logEntries.values.first as Map<dynamic, dynamic>;
-
-        setState(
-              () {
-            plasticBags = (firstEntry['plastic_bags'] ?? 0) as int;
-            paperBags = (firstEntry['paper_bags'] ?? 0) as int;
-            foodBags = (firstEntry['food_bags'] ?? 0) as int;
-          },
-        );
-      }
-    }
+    setState(() {
+      userRole = prefs.getString('user_role');
+      userEmail = prefs.getString('user_email');
+      isLoading = false; // Set loading to false once data is fetched
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: "Resident Home",
-      home: Scaffold(
-        drawer: const SideBar(),
-        body: Stack(
-          children: [
-            // Scrollable content goes here
-            SingleChildScrollView(
-              padding: const EdgeInsets.only(top: 127),
+    if (isLoading) {
+      return Center(child: CircularProgressIndicator(color: AppColors.primaryColor));
+    }
+    final screenHeight = MediaQuery.of(context).size.height; // Get screen height
+
+    return Scaffold(
+      backgroundColor: AppColors.backgroundSecondColor,
+      body: isLoading
+          ? Center(child: CircularProgressIndicator()) // Show a loader if data is being fetched
+          : Column(
+        children: [
+          SizedBox(
+            // Pass userRole and userEmail to HomeHeader
+            child: HomeHeader(
+              userRole: userRole ?? "Guest", // Provide default values if null
+              userEmail: userEmail ?? "Not Available",
+            ),
+          ),
+          Expanded(
+            child: Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: AppColors.backgroundColor,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(25),
+                  topRight: Radius.circular(25),
+                ),
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: Column(
                   children: [
-                    const SizedBox(height: 60),
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Upcoming Collection',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 16,
-                            fontFamily: 'Poppins',
-                            fontWeight: FontWeight.w600,
-                          ),
+                    SizedBox(height: 7.0),
+                    Container(
+                      height: 52.0,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(13.0),
+                      ),
+                      child: TextField(
+                        decoration: InputDecoration(
+                          contentPadding: EdgeInsets.symmetric(vertical: 15.0),
+                          prefixIcon: Icon(Icons.search, color: Colors.grey),
+                          hintText: 'Track your truck',
+                          border: InputBorder.none,
                         ),
-                      ],
+                      ),
                     ),
+                    SizedBox(height: 25.0),
                     Container(
                       width: double.infinity,
-                      height: 80,
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10.0),
                         color: AppColors.backgroundSecondColor,
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Color(0x3F000000),
-                            blurRadius: 4,
-                            offset: Offset(0, 4),
-                            spreadRadius: 0,
-                          )
-                        ],
+                        borderRadius: BorderRadius.circular(25),
                       ),
-                      child: const Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(20.0),
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              "Date",
+                              'Report an emergency',
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                color: AppColors.textColor,
+                                color: Colors.black,
                                 fontSize: 20,
                                 fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
-                            Text(
-                              "Time",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: AppColors.textColor,
-                                fontSize: 20,
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w400,
+                                fontWeight: FontWeight.w600,
                                 height: 0,
                               ),
-                            )
+                            ),
+                            SizedBox(
+                              height: 20,
+                            ),
+                            BtnNew(
+                              width: 132,
+                              height: 30,
+                              buttonText: 'Report!',
+                              onPressed: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>  Emergency()));
+                              },
+                            ),
                           ],
                         ),
                       ),
                     ),
-                    const SizedBox(height: 41),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const LogGarbage(),
-                          ),
-                        );
-                      },
-                      child: Column(
-                        children: [
-                          const Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Log Garbage Bags',
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 16,
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Container(
-                            width: double.infinity,
-                            height: 111,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10.0),
-                              color: AppColors.backgroundSecondColor,
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Color(0x3F000000),
-                                  blurRadius: 4,
-                                  offset: Offset(0, 4),
-                                  spreadRadius: 0,
-                                )
-                              ],
-                            ),
-                            child: Column(
-                              children: [
-                                const SizedBox(height: 10),
-                                Row(
-                                  mainAxisAlignment:
-                                  MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    _buildBagIconAndCount(
-                                        Icons.delete_sharp,
-                                        plasticBags,
-                                        const Color.fromRGBO(12, 147, 0, 1)),
-                                    _buildBagIconAndCount(
-                                        Icons.delete_sharp,
-                                        paperBags,
-                                        const Color.fromRGBO(147, 0, 0, 1)),
-                                    _buildBagIconAndCount(
-                                        Icons.delete_sharp,
-                                        foodBags,
-                                        const Color.fromRGBO(0, 32, 147, 1)),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
+                    SizedBox(height: 20), // Add some spacing before the image
+                    // Expanded Image Section
+                    Expanded(
+                      child: Image.asset(
+                        'assets/resident_home.png',
+                        fit: BoxFit.contain, // Adjusts the image to fit the space
                       ),
                     ),
-                    const SizedBox(height: 80),
-                    BtnSmall(
-                      buttonText: "Special Request",
-                      onPressed: () async {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const SpecialRequest()),
-                        );
-                      },
-                    ),
                   ],
                 ),
               ),
-            ),
-            // Fixed Container at the top
-            Container(
-              height: 127,
-              decoration: const BoxDecoration(
-                color: AppColors.backgroundSecondColor,
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(20.0),
-                  bottomRight: Radius.circular(20.0),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Color(0x3F000000),
-                    blurRadius: 4,
-                    offset: Offset(0, 4),
-                    spreadRadius: 0,
-                  ),
-                ],
-              ),
-              child: Padding(
-                padding: const EdgeInsets.only(left: 10.0, right: 10.0),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 35),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Image.asset(
-                          "assets/app_name.png",
-                          height: 22,
-                        ),
-                        const SizedBox(width: 20),
-                        Builder(
-                          builder: (context) => IconButton(
-                            icon: const Icon(Icons.more_horiz),
-                            onPressed: () {
-                              Scaffold.of(context).openDrawer();
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        const Text(
-                          "Hello, ",
-                          style: TextStyle(
-                            color: AppColors.textColor,
-                            fontSize: 16,
-                            fontFamily: 'Poppins',
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        Text(
-                          firstName.isNotEmpty ? firstName : "User Name", // Display first name
-                          style: const TextStyle(
-                            color: AppColors.textColor,
-                            fontSize: 16,
-                            fontFamily: 'Poppins',
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-        bottomNavigationBar: const BottomNavR(current: "home"),
-      ),
-    );
-  }
-
-  // Helper method to build icon and count widget
-  Widget _buildBagIconAndCount(IconData icon, int count, Color color) {
-    return Center(
-      child: Column(
-        children: [
-          SizedBox(
-            height: 60,
-            width: 60,
-            child: Icon(
-              icon,
-              size: 50,
-              color: color,
             ),
           ),
-          Text(
-            count.toString(),
-            style: const TextStyle(
-              color: AppColors.textColor,
-              fontSize: 16,
-              fontFamily: 'Poppins',
-              fontWeight: FontWeight.w600,
-            ),
+          BottomNavR(
+            current: 'home',
           ),
         ],
       ),

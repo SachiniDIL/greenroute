@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:greenroute/common/widgets/custom_table.dart';
 import 'package:greenroute/common/widgets/home_header.dart';
 import 'package:greenroute/common/widgets/new_button.dart';
 import 'package:greenroute/disposal_officer/screens/disposal_history.dart';
-import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // For SharedPreferences
+import '../../common/widgets/custom_table.dart';
 import '../../theme.dart';
 import '../services/disposal_service.dart'; // Correctly import DisposalService
 import '../widgets/bottom_nav_do.dart';
@@ -17,13 +17,30 @@ class DOHome extends StatefulWidget {
 }
 
 class _DOHomeState extends State<DOHome> {
-  List<Map<String, dynamic>> latestDisposals = []; // Store the latest disposal data
+  List<Map<String, dynamic>> latestDisposals = [];
   bool isLoading = true;
-  double garbageTotal=0;
+  double garbageTotal = 0;
+  String? userRole;
+  String? userEmail;
+
   @override
   void initState() {
     super.initState();
-    _fetchLatestDisposals();
+    _loadUserData(); // Load user data when the widget is initialized
+    _fetchLatestDisposals(); // Fetch disposal data
+  }
+
+  // Method to load user_role and user_email from SharedPreferences
+  Future<void> _loadUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userRole = prefs.getString('user_role');
+      userEmail = prefs.getString('user_email');
+      isLoading = false;
+    });
+
+    print("Loaded User Role: $userRole");
+    print("Loaded User Email: $userEmail");
   }
 
 
@@ -37,7 +54,6 @@ class _DOHomeState extends State<DOHome> {
       List<Map<String, dynamic>> combinedData = disposals.map((disposal) {
         String truckId = disposal['truck_number'];
         var truck = trucks.firstWhere((truck) => truck['truck_id'] == truckId, orElse: () => {});
-
         return {
           'truckNo': truck.isNotEmpty ? truck['truck_number'] : 'Unknown',
           'date': disposal['date'] ?? 'Unknown',
@@ -45,29 +61,6 @@ class _DOHomeState extends State<DOHome> {
         };
       }).toList();
 
-      // Sort by date and time, descending (latest first)
-      combinedData.sort((a, b) {
-        DateTime dateA = DateTime.parse(a['date']);
-        DateTime dateB = DateTime.parse(b['date']);
-
-        int dateComparison = dateB.compareTo(dateA);
-        if (dateComparison != 0) return dateComparison;
-
-        // Clean the time string by removing unwanted characters (e.g., non-breaking spaces)
-        try {
-          DateFormat timeFormat = DateFormat.jm(); // j = Hour in AM/PM format
-          String cleanedTimeA = a['time'].replaceAll(RegExp(r'[^\x00-\x7F]'), ''); // Remove non-ASCII characters
-          String cleanedTimeB = b['time'].replaceAll(RegExp(r'[^\x00-\x7F]'), ''); // Remove non-ASCII characters
-          DateTime timeA = timeFormat.parse(cleanedTimeA);
-          DateTime timeB = timeFormat.parse(cleanedTimeB);
-          return timeB.compareTo(timeA);
-        } catch (e) {
-          print('Error parsing time: $e');
-          return 0; // Treat as equal in case of failure
-        }
-      });
-
-      // Get the latest 4 disposals
       setState(() {
         latestDisposals = combinedData.take(4).toList();
         isLoading = false;
@@ -80,15 +73,22 @@ class _DOHomeState extends State<DOHome> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return Center(child: CircularProgressIndicator(color: AppColors.primaryColor));
+    }
     return Scaffold(
       backgroundColor: AppColors.backgroundSecondColor,
       body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SizedBox(child: HomeHeader()),
+          SizedBox(
+            // Pass userRole and userEmail to HomeHeader
+            child: HomeHeader(
+              userRole: userRole ?? "Guest", // Provide default values if null
+              userEmail: userEmail ?? "Not Available",
+            ),
+          ),
           Expanded(
             child: SingleChildScrollView(
               child: Container(
@@ -130,7 +130,8 @@ class _DOHomeState extends State<DOHome> {
                             onPressed: () {
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context) => const NewDisposal()),
+                                MaterialPageRoute(
+                                    builder: (context) => const NewDisposal()),
                               );
                             },
                           ),
@@ -217,7 +218,10 @@ class _DOHomeState extends State<DOHome> {
     );
   }
 
-  Widget _buildActionButton({required String title, required String buttonText, VoidCallback? onPressed}) {
+  Widget _buildActionButton(
+      {required String title,
+      required String buttonText,
+      VoidCallback? onPressed}) {
     return Container(
       height: 160,
       decoration: ShapeDecoration(
@@ -244,7 +248,8 @@ class _DOHomeState extends State<DOHome> {
               width: double.infinity,
               height: 45,
               buttonText: buttonText,
-              onPressed: onPressed ?? () {}, // Provide a default empty function if null
+              onPressed: onPressed ??
+                  () {}, // Provide a default empty function if null
             ),
             SizedBox(height: 15),
           ],
@@ -283,7 +288,8 @@ class _DOHomeState extends State<DOHome> {
               height: 35.0,
               buttonText: 'See more',
               onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => DisposalHistory()));
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => DisposalHistory()));
               },
             ),
             SizedBox(height: 5.0),
@@ -305,7 +311,6 @@ class _DOHomeState extends State<DOHome> {
     ];
 
     if (isLoading) {
-      // Add a loading row
       rows.add(
         TableRow(
           children: [
@@ -316,13 +321,13 @@ class _DOHomeState extends State<DOHome> {
         ),
       );
     } else {
-      // Add rows for the latest disposals
       for (var disposal in latestDisposals) {
         rows.add(
           TableRow(
             decoration: BoxDecoration(
               color: AppColors.backgroundColor,
-              border: Border(top: BorderSide(width: 2, color: Color(0xFFD1CFD7))),
+              border:
+                  Border(top: BorderSide(width: 2, color: Color(0xFFD1CFD7))),
             ),
             children: [
               _buildTableCell(disposal['truckNo']),

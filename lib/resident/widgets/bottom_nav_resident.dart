@@ -27,15 +27,7 @@ class BottomNavR extends StatelessWidget{
             },
             child: home(current), // Home icon
           ),
-          GestureDetector(
-            // onTap: () {
-            //   Navigator.push(
-            //     context,
-            //     MaterialPageRoute(builder: (context) => const ResidentSchedule()),
-            //   ); // Navigate to Schedule screen
-            // },
-            child: schedule(current), // Schedule icon
-          ),
+
           GestureDetector(
             // onTap: () {
             //   Navigator.push(
@@ -67,15 +59,6 @@ class BottomNavR extends StatelessWidget{
      return const RIconFalse(bottomIcon: Icon(Icons.home));
    }
   }
-
-   Widget schedule(String current){
-     if(current == "schedule"){
-       return const RIconTrue(bottomIcon: Icon(Icons.calendar_month));
-     }
-     else{
-       return const RIconFalse(bottomIcon: Icon(Icons.calendar_month));
-     }
-   }
 
    Widget notification(String current){
      if(current == "notification"){
