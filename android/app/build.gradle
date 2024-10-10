@@ -1,61 +1,53 @@
 plugins {
     id "com.android.application"
     id "kotlin-android"
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id "dev.flutter.flutter-gradle-plugin"
-
-    // Add the Google services Gradle plugin
     id 'com.google.gms.google-services'
 }
 
 android {
-    namespace = "com.example.greenroute"
-    compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    namespace "com.example.greenroute"
+    compileSdk 34 // Replace with your actual SDK version
+    ndkVersion "25.1.8937393" // Replace with the correct NDK version
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8
+        jvmTarget = "1.8" // Use '=' here instead of method call
     }
 
     defaultConfig {
-        applicationId = "com.example.greenroute"
-        minSdk = 23
-        targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
+        applicationId "com.example.greenroute"
+        minSdkVersion 23
+        targetSdkVersion 34 // Make sure this matches your compileSdkVersion
+        versionCode 1
+        versionName "1.0.0"
     }
 
     buildTypes {
         release {
-            signingConfig = signingConfigs.debug
+            signingConfig signingConfigs.debug // Adjust this for release builds
         }
     }
 }
 
 flutter {
-    source = "../.."
+    source "../.."
 }
 
 dependencies {
-    // Import the Firebase BoM (Bill of Materials)
+    // Firebase BoM for automatic version management of Firebase SDKs
     implementation platform('com.google.firebase:firebase-bom:33.4.0')
 
-    // Add Firebase Analytics as an example
+    // Add Firebase and Google Play Services dependencies
     implementation 'com.google.firebase:firebase-analytics'
-
+    implementation 'com.google.firebase:firebase-auth'
+    implementation 'com.google.firebase:firebase-database'
     implementation 'com.google.android.gms:play-services-auth:21.2.0'
     implementation 'com.google.android.gms:play-services-maps:19.0.0'
-    implementation 'com.google.firebase:firebase-auth:23.0.0'
-    implementation 'com.google.firebase:firebase-database:21.0.0'
-
-    // Add the dependencies for any other Firebase products you need (without specifying versions)
-    // Example: implementation 'com.google.firebase:firebase-auth'
 }
 
-// Apply the Google services plugin at the bottom
 apply plugin: 'com.google.gms.google-services'

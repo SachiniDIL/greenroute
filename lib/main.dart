@@ -41,7 +41,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _checkLoginStatus() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool? isLoggedIn = prefs.getBool('is_logged_in');
+    bool? isLoggedIn = prefs.getBool('logged');
     String? userRole = prefs.getString('user_role');
 
     // Simulate a short delay for the splash screen

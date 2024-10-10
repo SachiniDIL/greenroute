@@ -127,6 +127,7 @@ class _SideBarState extends State<SideBar> {
                 // Clear user_email from SharedPreferences
                 SharedPreferences prefs = await SharedPreferences.getInstance();
                 await prefs.setString('user_email', 'null');
+                await prefs.setBool('logged', false);
 
                 // Navigate to the LoginSignup screen
                 Navigator.pushAndRemoveUntil(

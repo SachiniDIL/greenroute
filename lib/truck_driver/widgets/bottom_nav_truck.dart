@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart'; // For date formatting
 import 'package:greenroute/common/screens/profile.dart';
 import 'package:greenroute/truck_driver/screens/td_schedule.dart';
 import 'package:greenroute/truck_driver/screens/truck_driver_home.dart';
@@ -12,6 +13,9 @@ class BottomNavTD extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Get today's date and format it as 'yyyy-MM-dd'
+    String todayDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
     return Container(
       width: double.infinity,
       height: 75,
@@ -32,7 +36,12 @@ class BottomNavTD extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => TDSchedule()),
+                MaterialPageRoute(
+                  builder: (context) => TDSchedule(
+                    upcomingScheduleDetails: '',
+                    defaultDate: todayDate,  // Pass today's date here
+                  ),
+                ),
               ); // Navigate to Schedule screen
             },
             child: schedule(current), // Schedule icon

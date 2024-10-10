@@ -25,6 +25,40 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>(); // Form key for validation
   final LoginService _loginService = LoginService(); // Login service
 
+  @override
+  void initState() {
+    super.initState();
+    _checkLoginState(); // Check if the user is already logged in
+  }
+
+  // Method to check if the user is already logged in
+  Future<void> _checkLoginState() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool isLogged = prefs.getBool('logged') ?? false;
+
+    if (isLogged) {
+      String? userRole = prefs.getString('user_role');
+
+      if (userRole == 'resident') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const ResidentHome()),
+        );
+      } else if (userRole == 'truck_driver') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => TruckDriverHome()),
+        );
+      } else if (userRole == 'disposal_officer') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => DOHome()),
+        );
+      }
+    }
+  }
+
+  // Method to load the user role from SharedPreferences
   Future<String?> _getUserRole() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString('user_role'); // Retrieve user role
@@ -33,10 +67,11 @@ class _LoginPageState extends State<LoginPage> {
   // Save login state and email
   Future<void> _saveLoginState(String email) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isLogged', true); // Save login state as true
+    await prefs.setBool('logged', true); // Save login state as true
     await prefs.setString('user_email', email); // Save the user's email
   }
 
+  // Login function
   Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
       String? userRole = await _getUserRole();
