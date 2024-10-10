@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:greenroute/resident/screens/resident_home.dart';
 
 import '../../theme.dart';
+import '../../common/screens/profile.dart';
 
 class BottomNavR extends StatelessWidget{
    final String current;
@@ -38,12 +39,12 @@ class BottomNavR extends StatelessWidget{
             child: notification(current), // Notification icon
           ),
           GestureDetector(
-            // onTap: () {
-            //   Navigator.push(
-            //     context,
-            //     MaterialPageRoute(builder: (context) => const ResidentProfile()),
-            //   ); // Navigate to Profile screen
-            // },
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const Profile()),
+              ); // Navigate to Profile screen
+            },
             child: profile(current), // Profile icon
           ),     // Profile icon
         ],

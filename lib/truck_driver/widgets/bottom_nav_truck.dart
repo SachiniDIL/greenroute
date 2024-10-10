@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:greenroute/common/screens/profile.dart';
 import 'package:greenroute/truck_driver/screens/td_schedule.dart';
 import 'package:greenroute/truck_driver/screens/truck_driver_home.dart';
 
@@ -49,7 +50,7 @@ class BottomNavTD extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => TruckDriverHome()),
+                MaterialPageRoute(builder: (context) => Profile()),
               ); // Navigate to Profile screen
             },
             child: profile(current), // Profile icon
