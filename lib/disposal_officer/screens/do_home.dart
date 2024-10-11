@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:greenroute/common/widgets/home_header.dart';
 import 'package:greenroute/common/widgets/new_button.dart';
 import 'package:greenroute/disposal_officer/screens/disposal_history.dart';
@@ -73,147 +74,177 @@ class _DOHomeState extends State<DOHome> {
     }
   }
 
+  Future<void> _showExitConfirmationDialog() async {
+    final shouldExit = await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Are you sure?'),
+        content: const Text('Do you want to exit the app?'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false), // Stay in the app
+            child: const Text('No'),
+          ),
+          TextButton(
+            onPressed: () => SystemNavigator.pop(), // Exit the app
+            child: const Text('Yes'),
+          ),
+        ],
+      ),
+    );
+    return shouldExit;
+  }
+
+
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
       return Center(child: CircularProgressIndicator(color: AppColors.primaryColor));
     }
-    return Scaffold(
-      backgroundColor: AppColors.backgroundSecondColor,
-      body: Column(
-        children: [
-          SizedBox(
-            // Pass userRole and userEmail to HomeHeader
-            child: HomeHeader(
-              userRole: userRole ?? "Guest", // Provide default values if null
-              userEmail: userEmail ?? "Not Available",
+    return PopScope(
+      onPopInvokedWithResult: (bool didPop, dynamic result) async {
+        if (didPop) {
+          // Show exit confirmation dialog when the user presses back
+          await _showExitConfirmationDialog();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.backgroundSecondColor,
+        body: Column(
+          children: [
+            SizedBox(
+              // Pass userRole and userEmail to HomeHeader
+              child: HomeHeader(
+                userRole: userRole ?? "Guest", // Provide default values if null
+                userEmail: userEmail ?? "Not Available",
+              ),
             ),
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Container(
-                padding: EdgeInsets.all(20.0),
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: AppColors.backgroundColor,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(25),
-                    topRight: Radius.circular(25),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Container(
+                  padding: EdgeInsets.all(20.0),
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: AppColors.backgroundColor,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(25),
+                      topRight: Radius.circular(25),
+                    ),
                   ),
-                ),
-                child: Column(
-                  children: [
-                    SizedBox(height: 7.0),
-                    Container(
-                      height: 52.0,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        borderRadius: BorderRadius.circular(13.0),
-                      ),
-                      child: TextField(
-                        decoration: InputDecoration(
-                          contentPadding: EdgeInsets.symmetric(vertical: 15.0),
-                          prefixIcon: Icon(Icons.search, color: Colors.grey),
-                          hintText: 'search for truck details',
-                          border: InputBorder.none,
+                  child: Column(
+                    children: [
+                      SizedBox(height: 7.0),
+                      Container(
+                        height: 52.0,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(13.0),
                         ),
-                      ),
-                    ),
-                    SizedBox(height: 30.0),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildActionButton(
-                            title: 'New Disposal',
-                            buttonText: 'Add new disposal',
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => const NewDisposal()),
-                              );
-                            },
+                        child: TextField(
+                          decoration: InputDecoration(
+                            contentPadding: EdgeInsets.symmetric(vertical: 15.0),
+                            prefixIcon: Icon(Icons.search, color: Colors.grey),
+                            hintText: 'search for truck details',
+                            border: InputBorder.none,
                           ),
                         ),
-                        SizedBox(width: 10),
-                        Expanded(
-                          child: Container(
-                            height: 160,
-                            decoration: ShapeDecoration(
-                              color: AppColors.backgroundSecondColor,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
+                      ),
+                      SizedBox(height: 30.0),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildActionButton(
+                              title: 'New Disposal',
+                              buttonText: 'Add new disposal',
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => const NewDisposal()),
+                                );
+                              },
                             ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(10.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    'Garbage Total',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: Colors.black
-                                          .withOpacity(0.6399999856948853),
-                                      fontSize: 20,
-                                      fontFamily: 'Poppins',
-                                      fontWeight: FontWeight.w900,
-                                      height: 0,
+                          ),
+                          SizedBox(width: 10),
+                          Expanded(
+                            child: Container(
+                              height: 160,
+                              decoration: ShapeDecoration(
+                                color: AppColors.backgroundSecondColor,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(10.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      'Garbage Total',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: Colors.black
+                                            .withOpacity(0.6399999856948853),
+                                        fontSize: 20,
+                                        fontFamily: 'Poppins',
+                                        fontWeight: FontWeight.w900,
+                                        height: 0,
+                                      ),
                                     ),
-                                  ),
-                                  SizedBox(
-                                    height: 37,
-                                  ),
-                                  Text.rich(
-                                    TextSpan(
-                                      children: [
-                                        TextSpan(
-                                          text: garbageTotal.toString(),
-                                          style: TextStyle(
-                                            color: Colors.black.withOpacity(
-                                                0.6399999856948853),
-                                            fontSize: 40,
-                                            fontFamily: 'Poppins',
-                                            fontWeight: FontWeight.w700,
-                                            height: 0,
-                                          ),
-                                        ),
-                                        TextSpan(
-                                          text: ' mt',
-                                          style: TextStyle(
-                                            color: Colors.black.withOpacity(
-                                                0.6399999856948853),
-                                            fontSize: 24,
-                                            fontFamily: 'Poppins',
-                                            fontWeight: FontWeight.w700,
-                                            height: 0,
-                                          ),
-                                        ),
-                                      ],
+                                    SizedBox(
+                                      height: 37,
                                     ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ],
+                                    Text.rich(
+                                      TextSpan(
+                                        children: [
+                                          TextSpan(
+                                            text: garbageTotal.toString(),
+                                            style: TextStyle(
+                                              color: Colors.black.withOpacity(
+                                                  0.6399999856948853),
+                                              fontSize: 40,
+                                              fontFamily: 'Poppins',
+                                              fontWeight: FontWeight.w700,
+                                              height: 0,
+                                            ),
+                                          ),
+                                          TextSpan(
+                                            text: ' mt',
+                                            style: TextStyle(
+                                              color: Colors.black.withOpacity(
+                                                  0.6399999856948853),
+                                              fontSize: 24,
+                                              fontFamily: 'Poppins',
+                                              fontWeight: FontWeight.w700,
+                                              height: 0,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 30),
-                    Divider(thickness: 0.7),
-                    SizedBox(height: 30),
-                    _buildTruckDetailsTable(),
-                    SizedBox(height: 30),
-                  ],
+                        ],
+                      ),
+                      SizedBox(height: 30),
+                      Divider(thickness: 0.7),
+                      SizedBox(height: 30),
+                      _buildTruckDetailsTable(),
+                      SizedBox(height: 30),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          BottomNavDO(current: 'home'),
-        ],
+            BottomNavDO(current: 'home'),
+          ],
+        ),
       ),
     );
   }

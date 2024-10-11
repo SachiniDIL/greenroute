@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:greenroute/common/screens/profile.dart';
 import 'package:greenroute/disposal_officer/screens/do_home.dart';
-import 'package:greenroute/truck_driver/screens/truck_driver_home.dart';
 
 import '../../theme.dart';
 

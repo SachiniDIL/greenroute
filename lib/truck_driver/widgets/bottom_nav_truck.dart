@@ -4,6 +4,7 @@ import 'package:greenroute/common/screens/profile.dart';
 import 'package:greenroute/truck_driver/screens/td_schedule.dart';
 import 'package:greenroute/truck_driver/screens/truck_driver_home.dart';
 
+import '../../common/screens/notification.dart';
 import '../../theme.dart';
 
 class BottomNavTD extends StatelessWidget {
@@ -50,7 +51,7 @@ class BottomNavTD extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => TruckDriverHome()),
+                MaterialPageRoute(builder: (context) => NotificationPage()),
               ); // Navigate to Notification screen
             },
             child: notification(current), // Notification icon

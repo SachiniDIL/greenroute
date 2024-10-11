@@ -62,6 +62,9 @@ class CustomTextField extends StatelessWidget {
             contentPadding:
                 const EdgeInsets.symmetric(vertical: 12.0, horizontal: 10.0),
             hintText: hint,
+            hintStyle: TextStyle(
+              color: Colors.grey, // Set your custom hint text color here
+            ),
             suffixIcon: suffixIcon != null
                 ? IconButton(
                     icon: Icon(suffixIcon),

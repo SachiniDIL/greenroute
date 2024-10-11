@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:greenroute/common/screens/login_or_signup.dart';
 import 'package:http/http.dart' as http;
@@ -5,6 +6,7 @@ import 'dart:convert';
 import 'package:greenroute/common/widgets/back_arrow.dart';
 import 'package:greenroute/common/widgets/button_large.dart';
 import 'package:greenroute/common/widgets/custom_text_field.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // Import shared_preferences
 import '../../common/utils/validators.dart';
 import '../../theme.dart';
 
@@ -29,7 +31,8 @@ class _TdSignupState extends State<TdSignup> {
   final emailController = TextEditingController();
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
-  final confirmPasswordController = TextEditingController(); // New controller for Confirm Password
+  final confirmPasswordController =
+      TextEditingController(); // New controller for Confirm Password
 
   String? selectedMunicipalCouncil;
   String? selectedEmployeeId;
@@ -49,7 +52,7 @@ class _TdSignupState extends State<TdSignup> {
   Future<void> _fetchMunicipalCouncils() async {
     try {
       final response =
-      await http.get(Uri.parse('$apiUrl/municipal_council.json'));
+          await http.get(Uri.parse('$apiUrl/municipal_council.json'));
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as Map<String, dynamic>;
         setState(() {
@@ -57,13 +60,11 @@ class _TdSignupState extends State<TdSignup> {
           municipalCouncilList = data.entries.map((entry) {
             return {
               'council_id': entry.value['council_id'].toString(),
-              // Correct field
               'council_name': entry.value['council_name'].toString(),
             };
           }).toList();
         });
-        print(
-            'Municipal Councils fetched: $municipalCouncilList'); // Debug output
+        print('Municipal Councils fetched: $municipalCouncilList');
       } else {
         print(
             'Error fetching municipal councils: Status ${response.statusCode}');
@@ -91,12 +92,7 @@ class _TdSignupState extends State<TdSignup> {
             };
           }).toList();
         });
-        print(
-            'Employee IDs for selected council: $employeeIdList'); // Debug output
-
-        if (employeeIdList.isEmpty) {
-          print('No employees available for this council'); // Debug output
-        }
+        print('Employee IDs for selected council: $employeeIdList');
       } else {
         print('Error fetching employee IDs: Status ${response.statusCode}');
       }
@@ -105,14 +101,32 @@ class _TdSignupState extends State<TdSignup> {
     }
   }
 
-  // Update truck driver data
+  // Update truck driver data and save FCM token to SharedPreferences
   Future<void> _updateTruckDriver(String truckDriverKey) async {
+    // Fetch FCM token
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+    String? fcmToken = await messaging.getToken();
+
+    if (fcmToken == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Failed to get FCM token")),
+      );
+      return;
+    }
+
+    // Store FCM token in SharedPreferences
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('fcmToken', fcmToken);
+    print("FCM Token saved in SharedPreferences: $fcmToken");
+
+    // Truck driver data including the FCM token
     final driverData = {
       'first_name': firstNameController.text,
       'last_name': lastNameController.text,
       'username': usernameController.text,
       'password': passwordController.text,
       'signup': true,
+      'fcmToken': fcmToken, // Store the FCM token in Firebase
     };
 
     try {
@@ -129,7 +143,7 @@ class _TdSignupState extends State<TdSignup> {
             backgroundColor: Colors.green,
           ),
         );
-        // Navigate to Truck Driver Home
+        // Navigate to LoginSignup after successful signup
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => LoginSignup()),
@@ -171,7 +185,7 @@ class _TdSignupState extends State<TdSignup> {
                       label: "First Name",
                       hint: "Enter your first name",
                       validator: (value) =>
-                      value!.isEmpty ? 'First Name is required' : null,
+                          value!.isEmpty ? 'First Name is required' : null,
                     ),
                     const SizedBox(height: 20),
 
@@ -181,7 +195,7 @@ class _TdSignupState extends State<TdSignup> {
                       label: "Last Name",
                       hint: "Enter your last name",
                       validator: (value) =>
-                      value!.isEmpty ? 'Last Name is required' : null,
+                          value!.isEmpty ? 'Last Name is required' : null,
                     ),
                     const SizedBox(height: 20),
 
@@ -191,10 +205,10 @@ class _TdSignupState extends State<TdSignup> {
                     const SizedBox(height: 5),
                     DropdownButtonFormField<String>(
                       value: selectedMunicipalCouncil,
-                      hint: const Text("Select Municipal Council"),
+                      hint: const Text("Select Municipal Council", style: TextStyle(color: Colors.grey),),
                       items: municipalCouncilList.map((council) {
                         return DropdownMenuItem(
-                          value: council['council_id'], // Correct council_id
+                          value: council['council_id'],
                           child: Text(council['council_name']!),
                         );
                       }).toList(),
@@ -202,42 +216,80 @@ class _TdSignupState extends State<TdSignup> {
                         setState(() {
                           selectedMunicipalCouncil = value;
                           selectedEmployeeId = null;
-                          employeeIdList.clear(); // Clear employee ID dropdown
+                          employeeIdList.clear();
                         });
                         if (value != null) {
-                          _fetchEmployeeIds(
-                              value); // Fetch employee IDs based on selected council
+                          _fetchEmployeeIds(value);
                         }
                       },
                       validator: (value) => value == null
                           ? 'Please select a Municipal Council'
                           : null,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(25.0),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(
+                            color: AppColors.primaryColor,
+                            width: 2.0,
+                          ),
+                          borderRadius: BorderRadius.circular(25.0),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(
+                            color: AppColors.buttonColor,
+                            width: 2.0,
+                          ),
+                          borderRadius: BorderRadius.circular(25.0),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                            vertical: 12.0, horizontal: 10.0),
+                      ),
                     ),
                     const SizedBox(height: 20),
 
-                    // Employee ID Dropdown
+// Employee ID Dropdown
                     const Text("Employee ID", style: AppTextStyles.formText),
                     const SizedBox(height: 5),
                     DropdownButtonFormField<String>(
                       value: selectedEmployeeId,
-                      hint: const Text("Select Employee ID"),
-                      items: employeeIdList.map(
-                            (emp) {
-                          return DropdownMenuItem(
-                            value: emp['truck_driver_key'],
-                            child: Text(emp['emp_id']!), // Display emp_id
-                          );
-                        },
-                      ).toList(),
+                      hint: const Text("Select Employee ID", style: TextStyle(color: Colors.grey),),
+                      items: employeeIdList.map((emp) {
+                        return DropdownMenuItem(
+                          value: emp['truck_driver_key'],
+                          child: Text(emp['emp_id']!),
+                        );
+                      }).toList(),
                       onChanged: (value) {
                         setState(() {
                           selectedEmployeeId = value;
                         });
                       },
                       validator: (value) =>
-                      value == null ? 'Please select an Employee ID' : null,
+                          value == null ? 'Please select an Employee ID' : null,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(25.0),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(
+                            color: AppColors.primaryColor,
+                            width: 2.0,
+                          ),
+                          borderRadius: BorderRadius.circular(25.0),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(
+                            color: AppColors.buttonColor,
+                            width: 2.0,
+                          ),
+                          borderRadius: BorderRadius.circular(25.0),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                            vertical: 12.0, horizontal: 10.0),
+                      ),
                     ),
-                    const SizedBox(height: 20),
 
                     // NIC Field
                     CustomTextField(
@@ -245,7 +297,7 @@ class _TdSignupState extends State<TdSignup> {
                       label: "NIC",
                       hint: "Enter your NIC",
                       validator: (value) =>
-                      value!.isEmpty ? 'NIC is required' : null,
+                          value!.isEmpty ? 'NIC is required' : null,
                     ),
                     const SizedBox(height: 20),
 
@@ -273,7 +325,7 @@ class _TdSignupState extends State<TdSignup> {
                       label: "Username",
                       hint: "Enter your username",
                       validator: (value) =>
-                      value!.isEmpty ? 'Username is required' : null,
+                          value!.isEmpty ? 'Username is required' : null,
                     ),
                     const SizedBox(height: 20),
 
@@ -297,7 +349,7 @@ class _TdSignupState extends State<TdSignup> {
 
                     // Confirm Password Field
                     CustomTextField(
-                      controller: confirmPasswordController, // Use the confirmPasswordController
+                      controller: confirmPasswordController,
                       label: "Confirm Password",
                       hint: "Confirm your password",
                       obscureText: _obscureConfirmPassword,

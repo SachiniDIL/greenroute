@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:greenroute/truck_driver/screens/truck_driver_home.dart';
@@ -206,7 +205,7 @@ class _TDScheduleState extends State<TDSchedule> {
                 SizedBox(
                   width: double.infinity,
                   child: Text(
-                    "Schedule for ${widget.defaultDate}",
+                    "Schedule",
                     style: AppTextStyles.topic,
                   ),
                 ),

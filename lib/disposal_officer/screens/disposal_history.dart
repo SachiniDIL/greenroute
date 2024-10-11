@@ -5,7 +5,9 @@ import 'package:greenroute/theme.dart';
 import '../services/disposal_service.dart';
 
 class DisposalHistory extends StatefulWidget {
-  const DisposalHistory({super.key});
+  final String? truckDriver; // Add truckDriver parameter
+
+  const DisposalHistory({super.key, this.truckDriver}); // Accept truckDriver parameter
 
   @override
   _DisposalHistoryState createState() => _DisposalHistoryState();
@@ -27,10 +29,11 @@ class _DisposalHistoryState extends State<DisposalHistory> {
   // Fetch disposal history
   Future<void> _fetchDisposalHistory() async {
     try {
+      // Fetch all necessary data
       List<Map<String, dynamic>> history = await DisposalService.fetchDisposalHistory();
       List<Map<String, dynamic>> trucks = await DisposalService.fetchTruckData();
-      List<Map<String, dynamic>> truckDrivers = await DisposalService.fetchTruckDrivers(); // Fetch truck drivers
-      List<Map<String, dynamic>> municipalCouncils = await DisposalService.fetchMunicipalCouncils(); // Fetch municipal councils
+      List<Map<String, dynamic>> truckDrivers = await DisposalService.fetchTruckDrivers();
+      List<Map<String, dynamic>> municipalCouncils = await DisposalService.fetchMunicipalCouncils();
 
       // Map truck ids to truck numbers
       Map<String, String> truckIdToNumber = {
@@ -49,7 +52,25 @@ class _DisposalHistoryState extends State<DisposalHistory> {
           council['council_id']: council['council_name']
       };
 
-      // Parse and process the history data, ensuring dynamic values are cast to strings
+      // Check if a specific truck driver is provided
+      String? selectedTruckDriver = widget.truckDriver;
+
+      // Filter the history if a truck driver is provided
+      if (selectedTruckDriver != null) {
+        // Filter only those disposals where the truck driver matches the selectedTruckDriver
+        history = history.where((item) => item['truck_driver'] == selectedTruckDriver).toList();
+      }
+
+      // If no disposal records are found after filtering
+      if (history.isEmpty) {
+        setState(() {
+          disposalHistory = []; // Set empty history if no records found
+          isLoading = false;
+        });
+        return; // Exit early if no records to display
+      }
+
+      // Parse and process the history data
       setState(() {
         disposalHistory = history.map((item) {
           // Match truck_number from disposal with truck_id from truck data

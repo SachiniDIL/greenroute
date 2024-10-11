@@ -4,9 +4,11 @@ import 'dart:convert';
 import 'package:greenroute/common/widgets/button_large.dart';
 import 'package:greenroute/common/widgets/custom_text_field.dart';
 import 'package:greenroute/common/utils/validators.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../theme.dart';
 import '../../common/widgets/back_arrow.dart';
 import 'do_home.dart'; // The screen to navigate after successful signup
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class DOSignup extends StatefulWidget {
   const DOSignup({super.key});
@@ -34,7 +36,6 @@ class _DOSignupState extends State<DOSignup> {
 
   final _formKey = GlobalKey<FormState>();
 
-  // Fetch the list of disposal officers where signup is false
   // Fetch the list of disposal officers where signup is false
   Future<void> _fetchDisposalOfficers() async {
     setState(() {
@@ -79,7 +80,6 @@ class _DOSignupState extends State<DOSignup> {
       }
     }
   }
-
 
   Future<String?> getDisposalOfficerKey(String disposalOfficerId) async {
     try {
@@ -136,17 +136,32 @@ class _DOSignupState extends State<DOSignup> {
         orElse: () => {},
       );
 
-      if (officer.isNotEmpty &&
-          officer['email'] == email &&
-          officer['phone_number'] == mobile) {
+      if (officer.isNotEmpty && officer['email'] == email && officer['phone_number'] == mobile) {
         if (officer['nic'] == nic) {
           try {
+            // Fetch FCM token
+            FirebaseMessaging messaging = FirebaseMessaging.instance;
+            String? fcmToken = await messaging.getToken();
+
+            if (fcmToken == null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("Failed to get FCM token")),
+              );
+              return;
+            }
+
+            // Save FCM token in SharedPreferences
+            SharedPreferences prefs = await SharedPreferences.getInstance();
+            await prefs.setString('fcmToken', fcmToken);
+            print("FCM Token saved in SharedPreferences: $fcmToken");
+
             Map<String, dynamic> updatedOfficerData = {
               'first_name': firstName,
               'last_name': lastName,
               'username': username,
               'password': password,
-              'signup': true
+              'signup': true,
+              'fcmToken': fcmToken // Add FCM token to the data
             };
 
             String? officerKey = await getDisposalOfficerKey(officer['disposal_officer_id']);
@@ -161,8 +176,7 @@ class _DOSignupState extends State<DOSignup> {
 
             print('Request data: $updatedOfficerData');
             var response = await http.patch(
-              Uri.parse(
-                  "https://greenroute-7251d-default-rtdb.firebaseio.com/disposal_officer/$officerKey.json"),
+              Uri.parse("https://greenroute-7251d-default-rtdb.firebaseio.com/disposal_officer/$officerKey.json"),
               headers: {"Content-Type": "application/json"},
               body: json.encode(updatedOfficerData),
             );
@@ -171,12 +185,11 @@ class _DOSignupState extends State<DOSignup> {
               print('User signed up successfully');
               _fetchDisposalOfficers();
 
-              // Show success SnackBar with green background
+              // Show success SnackBar
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Signup successful!'),
                   backgroundColor: Colors.green,
-                  behavior: SnackBarBehavior.floating,  // Optional: Make it floating
                 ),
               );
 
@@ -217,7 +230,6 @@ class _DOSignupState extends State<DOSignup> {
     }
   }
 
-
   @override
   void initState() {
     super.initState();
@@ -245,8 +257,7 @@ class _DOSignupState extends State<DOSignup> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text("Employee ID",
-                            style: AppTextStyles.formText),
+                        const Text("Employee ID", style: AppTextStyles.formText),
                         const SizedBox(height: 5),
                         DropdownButtonFormField<String>(
                           decoration: InputDecoration(
@@ -286,7 +297,6 @@ class _DOSignupState extends State<DOSignup> {
                           validator: (value) =>
                           value == null ? 'Please select an Employee ID' : null,
                         ),
-
                       ],
                     ),
                     const SizedBox(height: 20),
@@ -370,13 +380,11 @@ class _DOSignupState extends State<DOSignup> {
                           : Icons.visibility,
                       onSuffixTap: () {
                         setState(() {
-                          _obscureConfirmPassword =
-                          !_obscureConfirmPassword;
+                          _obscureConfirmPassword = !_obscureConfirmPassword;
                         });
                       },
-                      validator: (value) =>
-                          Validators.validateConfirmPassword(
-                              value, passwordController.text),
+                      validator: (value) => Validators.validateConfirmPassword(
+                          value, passwordController.text),
                     ),
                     const SizedBox(height: 50),
 

@@ -44,7 +44,7 @@ class _HomeHeaderState extends State<HomeHeader> {
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as Map<String, dynamic>;
 
-        if (data != null && data.isNotEmpty) {
+        if (data.isNotEmpty) {
           final userData = data.values.first;
           setState(() {
             firstName = userData['first_name'] ?? 'User'; // Update firstName

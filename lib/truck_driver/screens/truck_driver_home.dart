@@ -1,6 +1,9 @@
 import 'dart:ffi';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:greenroute/common/screens/profile.dart';
+import 'package:greenroute/disposal_officer/screens/disposal_history.dart';
 import 'package:greenroute/truck_driver/screens/fuel.dart';
 import 'package:greenroute/truck_driver/screens/route_map.dart';
 import 'package:greenroute/truck_driver/screens/td_schedule.dart';
@@ -22,6 +25,8 @@ class TruckDriverHome extends StatefulWidget {
 }
 
 class _TruckDriverHomeState extends State<TruckDriverHome> {
+  List<Map<String, dynamic>> latestDisposals = [];
+
   String? userRole;
   String? userEmail;
   bool isLoading = true;
@@ -38,7 +43,12 @@ class _TruckDriverHomeState extends State<TruckDriverHome> {
   @override
   void initState() {
     super.initState();
-    _loadUserData();
+    _initializeData();  // Call the new method to ensure the proper sequence
+  }
+
+  Future<void> _initializeData() async {
+    await _loadUserData(); // Wait for user data to load
+    _getLatestDisposalRecords(); // Fetch the latest disposal records here
   }
 
   // Method to load user_role and user_email from SharedPreferences
@@ -56,13 +66,11 @@ class _TruckDriverHomeState extends State<TruckDriverHome> {
     try {
       // Step 1: Fetch all truck drivers
       var response = await http.get(
-        Uri.parse(
-            '$dbURL/truck_driver.json?orderBy="email"&equalTo="$userEmail"'),
+        Uri.parse('$dbURL/truck_driver.json?orderBy="email"&equalTo="$userEmail"'),
       );
 
       if (response.statusCode == 200) {
-        var truckDriversData =
-            jsonDecode(response.body) as Map<String, dynamic>;
+        var truckDriversData = jsonDecode(response.body) as Map<String, dynamic>;
 
         // Step 2: Check if the response contains a valid truck driver
         if (truckDriversData.isNotEmpty) {
@@ -98,8 +106,7 @@ class _TruckDriverHomeState extends State<TruckDriverHome> {
         );
 
         if (scheduleResponse.statusCode == 200) {
-          var scheduleData =
-              jsonDecode(scheduleResponse.body) as Map<String, dynamic>;
+          var scheduleData = jsonDecode(scheduleResponse.body) as Map<String, dynamic>;
           DateTime? soonestDate; // Track the soonest available date
           String? soonestRouteId;
           String? soonestStartTime;
@@ -119,16 +126,14 @@ class _TruckDriverHomeState extends State<TruckDriverHome> {
 
                 if (_isToday(scheduledDate!)) {
                   startTime = schedule['start_time']; // Set startTime for today
-                  await _getRouteDetails(routeId,
-                      forToday: true); // Fetch and set today's route details
+                  await _getRouteDetails(routeId, forToday: true); // Fetch and set today's route details
                   setState(() {
                     // Rebuild the UI after data is fetched
                   });
                   return;
                 } else if (scheduleDate.isAfter(DateTime.now())) {
                   // Check if this is the soonest upcoming date
-                  if (soonestDate == null ||
-                      scheduleDate.isBefore(soonestDate)) {
+                  if (soonestDate == null || scheduleDate.isBefore(soonestDate)) {
                     soonestDate = scheduleDate;
                     soonestRouteId = routeId;
                     soonestStartTime = schedule['start_time'];
@@ -142,15 +147,13 @@ class _TruckDriverHomeState extends State<TruckDriverHome> {
           if (soonestDate != null) {
             upcomingScheduledDate = soonestDate.toString().split(" ")[0];
             upcomingStartTime = soonestStartTime;
-            await _getRouteDetails(soonestRouteId!,
-                forToday: false); // Fetch and set upcoming route details
+            await _getRouteDetails(soonestRouteId!, forToday: false); // Fetch and set upcoming route details
             setState(() {
               // Rebuild the UI after upcoming schedule is fetched
             });
           }
         } else {
-          print(
-              'Error fetching route schedules: ${scheduleResponse.statusCode}');
+          print('Error fetching route schedules: ${scheduleResponse.statusCode}');
         }
       } catch (e) {
         print('Error: $e');
@@ -172,8 +175,7 @@ class _TruckDriverHomeState extends State<TruckDriverHome> {
         // Check if intermediate_locations exists and is a list
         if (routeData['intermediate_locations'] != null &&
             routeData['intermediate_locations'] is List) {
-          var intermediateLocations =
-          routeData['intermediate_locations'] as List<dynamic>;
+          var intermediateLocations = routeData['intermediate_locations'] as List<dynamic>;
 
           // Store the first three intermediate locations to display
           var routeDetails = intermediateLocations
@@ -203,14 +205,93 @@ class _TruckDriverHomeState extends State<TruckDriverHome> {
     }
   }
 
+  Future<void> _getLatestDisposalRecords() async {
+    if (userEmail != null) {
+      print("User Email: $userEmail");  // Debugging point
+
+      String? empId = await _getEmpIdByEmail(userEmail!);
+      print("Emp ID: $empId");  // Debugging point
+
+      if (empId == null) {
+        print("No emp_id found for the user");
+        return;
+      }
+
+      try {
+        // Step 1: Fetch disposal records
+        var disposalResponse = await http.get(
+          Uri.parse('$dbURL/disposal.json'),
+        );
+
+        if (disposalResponse.statusCode == 200) {
+          var disposalData = jsonDecode(disposalResponse.body) as Map<String, dynamic>;
+
+          print("Disposal Data: $disposalData");  // Debugging point
+
+          // Step 2: Filter records by truck_driver == empId
+          List<Map<String, dynamic>> filteredDisposals = disposalData.entries
+              .where((entry) => entry.value['truck_driver'] == empId)
+              .map((entry) => {
+            'date': entry.value['date'],
+            'time': entry.value['time'],
+            'disposal_weight': entry.value['disposal_weight'],
+          })
+              .toList();
+
+          // Step 3: Sort the filtered disposals by date (newest first)
+          filteredDisposals.sort((a, b) {
+            DateTime dateA = DateTime.parse(a['date']);
+            DateTime dateB = DateTime.parse(b['date']);
+            return dateB.compareTo(dateA); // Sort in descending order
+          });
+
+          // Step 4: Take the latest 4 disposals
+          latestDisposals = filteredDisposals.take(4).toList();
+
+          print("Latest Disposals: $latestDisposals");  // Debugging point
+
+          setState(() {
+            // Rebuild UI to show the latest disposals
+          });
+        } else {
+          print('Error fetching disposal records: ${disposalResponse.statusCode}');
+        }
+      } catch (e) {
+        print('Error: $e');
+      }
+    } else {
+      print("User email is null.");
+    }
+  }
+
   bool _isToday(String date) {
     DateTime today = DateTime.now();
-    DateTime scheduledDateParsed =
-        DateTime.parse(date); // Assuming date is in the format 'yyyy-MM-dd'
+    DateTime scheduledDateParsed = DateTime.parse(date); // Assuming date is in the format 'yyyy-MM-dd'
 
     return today.year == scheduledDateParsed.year &&
         today.month == scheduledDateParsed.month &&
         today.day == scheduledDateParsed.day;
+  }
+
+  Future<void> _showExitConfirmationDialog() async {
+    final shouldExit = await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Are you sure?'),
+        content: const Text('Do you want to exit the app?'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false), // Stay in the app
+            child: const Text('No'),
+          ),
+          TextButton(
+            onPressed: () => SystemNavigator.pop(), // Exit the app
+            child: const Text('Yes'),
+          ),
+        ],
+      ),
+    );
+    return shouldExit;
   }
 
   @override
@@ -225,296 +306,310 @@ class _TruckDriverHomeState extends State<TruckDriverHome> {
 
     bool isTodayScheduled = scheduledDate != null && _isToday(scheduledDate!);
 
-    return Scaffold(
-      backgroundColor: AppColors.backgroundSecondColor,
-      body: Column(
-        children: [
-          SizedBox(
-            child: HomeHeader(
-              userRole: userRole ?? "Guest",
-              userEmail: userEmail ?? "Not Available",
+    return PopScope(
+      onPopInvokedWithResult: (bool didPop, dynamic result) async {
+        if (didPop) {
+          // Show exit confirmation dialog when the user presses back
+          await _showExitConfirmationDialog();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.backgroundSecondColor,
+        body: Column(
+          children: [
+            SizedBox(
+              child: HomeHeader(
+                userRole: userRole ?? "Guest",
+                userEmail: userEmail ?? "Not Available",
+              ),
             ),
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Container(
-                padding: EdgeInsets.all(20.0),
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: AppColors.backgroundColor,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(25),
-                    topRight: Radius.circular(25),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Container(
+                  padding: EdgeInsets.all(20.0),
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: AppColors.backgroundColor,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(25),
+                      topRight: Radius.circular(25),
+                    ),
                   ),
-                ),
-                child: Column(
-                  children: [
-                    SizedBox(
-                      width: double.infinity,
-                      height: 30,
-                      child: Text(
-                        'Latest Job',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 16,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w600,
-                          height: 0,
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 7.0,
-                    ),
-                    // Check if the scheduled date is today
-                    if (isTodayScheduled)
-                      _buildJobContainer(
-                          nextRouteDetails, startTime, "Start Now", true)
-                    else
-                      Column(
-                        children: [
-                          Text(
-                            "No trip scheduled for today",
-                            style: TextStyle(
-                              color: AppColors.primaryColor,
-                              fontSize: 18,
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w600,
-                            ),
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        width: double.infinity,
+                        height: 30,
+                        child: Text(
+                          'Latest Job',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 16,
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w600,
+                            height: 0,
                           ),
-                          SizedBox(height: 10.0),
-                          // Display upcoming schedule
-                          if (upcomingScheduledDate != null)
-                            _buildJobContainer(upcomingRouteDetails,
-                                upcomingStartTime, "View Schedule", false),
-                        ],
-                      ),
-                    SizedBox(
-                      height: 15.0,
-                    ),
-                    Divider(
-                      thickness: 0.7,
-                    ),
-                    SizedBox(
-                      height: 23.0,
-                    ),
-                    Container(
-                      width: double.infinity,
-                      decoration: ShapeDecoration(
-                        color: AppColors.backgroundSecondColor,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
                         ),
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 27.0, vertical: 15.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                      SizedBox(
+                        height: 7.0,
+                      ),
+                      if (isTodayScheduled)
+                        _buildJobContainer(nextRouteDetails, startTime, "Start Now", true)
+                      else
+                        Column(
                           children: [
                             Text(
-                              'Oil quarter',
-                              textAlign: TextAlign.center,
+                              "No trip scheduled for today",
                               style: TextStyle(
-                                color: Colors.black
-                                    .withOpacity(0.6399999856948853),
-                                fontSize: 20,
+                                color: AppColors.primaryColor,
+                                fontSize: 18,
                                 fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w900,
-                                height: 0,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
-                            SizedBox(
-                              height: 20.0,
-                            ),
-                            LayoutBuilder(
-                              builder: (context, constraints) {
-                                double totalWidth = constraints.maxWidth;
-                                double presentageWidth =
-                                    (totalWidth * precentage) / 100;
+                            SizedBox(height: 10.0),
+                            if (upcomingScheduledDate != null)
+                              _buildJobContainer(upcomingRouteDetails, upcomingStartTime, "View Schedule", false),
+                          ],
+                        ),
+                      SizedBox(
+                        height: 15.0,
+                      ),
+                      Divider(
+                        thickness: 0.7,
+                      ),
+                      SizedBox(
+                        height: 23.0,
+                      ),
+                      Container(
+                        width: double.infinity,
+                        decoration: ShapeDecoration(
+                          color: AppColors.backgroundSecondColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 27.0, vertical: 15.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Oil quarter',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.black.withOpacity(0.6399999856948853),
+                                  fontSize: 20,
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w900,
+                                  height: 0,
+                                ),
+                              ),
+                              SizedBox(
+                                height: 20.0,
+                              ),
+                              LayoutBuilder(
+                                builder: (context, constraints) {
+                                  double totalWidth = constraints.maxWidth;
+                                  double presentageWidth = (totalWidth * precentage) / 100;
 
-                                return Stack(
-                                  children: [
-                                    Container(
-                                      height: 15.0,
-                                      width: totalWidth,
-                                      decoration: ShapeDecoration(
-                                        color: Colors.white,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(5),
-                                        ),
-                                      ),
-                                    ),
-                                    Container(
-                                      height: 15.0,
-                                      width: presentageWidth,
-                                      decoration: ShapeDecoration(
-                                        color: AppColors.buttonColor,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.only(
-                                            topLeft: Radius.circular(5),
-                                            bottomLeft: Radius.circular(5),
+                                  return Stack(
+                                    children: [
+                                      Container(
+                                        height: 15.0,
+                                        width: totalWidth,
+                                        decoration: ShapeDecoration(
+                                          color: Colors.white,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(5),
                                           ),
                                         ),
                                       ),
-                                    ),
-                                    Stack(
-                                      children: [
-                                        Container(
-                                          height: 15.0,
-                                          width: presentageWidth,
-                                          decoration: ShapeDecoration(
-                                            color: AppColors.buttonColor,
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.only(
-                                                topLeft: Radius.circular(5),
-                                                bottomLeft: Radius.circular(5),
-                                              ),
+                                      Container(
+                                        height: 15.0,
+                                        width: presentageWidth,
+                                        decoration: ShapeDecoration(
+                                          color: AppColors.buttonColor,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.only(
+                                              topLeft: Radius.circular(5),
+                                              bottomLeft: Radius.circular(5),
                                             ),
                                           ),
                                         ),
-                                        SizedBox(
-                                          height: 15.0,
-                                          width: presentageWidth,
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                "$precentage%",
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 12,
-                                                  fontFamily: 'Poppins',
-                                                  fontWeight: FontWeight.w600,
-                                                  height: 0,
+                                      ),
+                                      Stack(
+                                        children: [
+                                          Container(
+                                            height: 15.0,
+                                            width: presentageWidth,
+                                            decoration: ShapeDecoration(
+                                              color: AppColors.buttonColor,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.only(
+                                                  topLeft: Radius.circular(5),
+                                                  bottomLeft: Radius.circular(5),
                                                 ),
                                               ),
-                                            ],
+                                            ),
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                );
-                              },
-                            ),
-                            SizedBox(
-                              height: 12.0,
-                            ),
-                            BtnNew(
-                              width: 170.0,
-                              height: 35.0,
-                              buttonText: 'Check quarter',
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => FuelPage()),
-                                );
-                              },
-                            ),
-                            SizedBox(
-                              height: 7.0,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 23.0,
-                    ),
-                    Container(
-                      width: double.infinity,
-                      decoration: ShapeDecoration(
-                        color: AppColors.backgroundSecondColor,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 27.0, vertical: 15.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Latest Disposal History',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Colors.black
-                                    .withOpacity(0.6399999856948853),
-                                fontSize: 20,
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w900,
-                                height: 0,
-                              ),
-                            ),
-                            SizedBox(
-                              height: 15.0,
-                            ),
-                            CustomTable(
-                              rows: [
-                                TableRow(
-                                  children: [
-                                    _buildTableCell("001"),
-                                    _buildTableCell("Task 1"),
-                                    _buildTableCell("Medium"),
-                                  ],
-                                ),
-                                TableRow(
-                                  decoration: BoxDecoration(
-                                    color: AppColors.backgroundColor,
-                                    border: Border(
-                                      top: BorderSide(
-                                        width: 2,
-                                        color: Color(0xFFD1CFD7),
+                                          SizedBox(
+                                            height: 15.0,
+                                            width: presentageWidth,
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              crossAxisAlignment: CrossAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  "$precentage%",
+                                                  textAlign: TextAlign.center,
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 12,
+                                                    fontFamily: 'Poppins',
+                                                    fontWeight: FontWeight.w600,
+                                                    height: 0,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                    ),
-                                  ),
-                                  children: [
-                                    _buildTableCell("001"),
-                                    _buildTableCell("Water leakage"),
-                                    _buildTableCell("High"),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            SizedBox(
-                              height: 15.0,
-                            ),
-                            BtnNew(
-                              width: 170.0,
-                              height: 35.0,
-                              buttonText: 'Check full history',
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => TruckDriverHome()),
-                                );
-                              },
-                            ),
-                            SizedBox(
-                              height: 5.0,
-                            ),
-                          ],
+                                    ],
+                                  );
+                                },
+                              ),
+                              SizedBox(
+                                height: 12.0,
+                              ),
+                              BtnNew(
+                                width: 170.0,
+                                height: 35.0,
+                                buttonText: 'Check quarter',
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => FuelPage()),
+                                  );
+                                },
+                              ),
+                              SizedBox(
+                                height: 7.0,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                      SizedBox(height: 30),
+                      _buildTruckDetailsTable(),
+                      SizedBox(height: 30),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          BottomNavTD(current: "home"),
-        ],
+            BottomNavTD(current: "home"),
+          ],
+        ),
       ),
     );
+  }
+
+  Widget _buildTruckDetailsTable() {
+    return Container(
+      width: double.infinity,
+      decoration: ShapeDecoration(
+        color: AppColors.backgroundSecondColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 27.0, vertical: 15.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Latest Disposal History',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.black.withOpacity(0.64),
+                fontSize: 20,
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            SizedBox(height: 15.0),
+            CustomTable(rows: _buildTableRows()),
+            SizedBox(height: 15.0),
+            BtnNew(
+              width: 170.0,
+              height: 35.0,
+              buttonText: 'See more',
+              onPressed: () async {
+                // Fetch the empId first
+                String? empId = await _getEmpIdByEmail(userEmail!);
+
+                // Then pass the empId to the DisposalHistory page
+                if (empId != null) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => DisposalHistory(truckDriver: empId), // Pass the empId as the truckDriver parameter
+                    ),
+                  );
+                } else {
+                  print("No truck driver found for the current user.");
+                }
+              },
+            ),
+            SizedBox(height: 5.0),
+          ],
+        ),
+      ),
+    );
+  }
+
+  List<TableRow> _buildTableRows() {
+    List<TableRow> rows = [
+      TableRow(
+        children: [
+          _buildTableCell("Date"),
+          _buildTableCell("Time"),
+          _buildTableCell("Weight"),
+        ],
+      ),
+    ];
+
+    if (isLoading) {
+      rows.add(
+        TableRow(
+          children: [
+            _buildTableCell("Loading..."),
+            _buildTableCell(""),
+            _buildTableCell(""),
+          ],
+        ),
+      );
+    } else {
+      for (var disposal in latestDisposals) {
+        rows.add(
+          TableRow(
+            decoration: BoxDecoration(
+              color: AppColors.backgroundColor,
+              border: Border(top: BorderSide(width: 2, color: Color(0xFFD1CFD7))),
+            ),
+            children: [
+              _buildTableCell(disposal['date']),
+              _buildTableCell(disposal['time']),
+              _buildTableCell(disposal['disposal_weight'].toString()),
+            ],
+          ),
+        );
+      }
+    }
+
+    return rows;
   }
 
   Widget _buildTableCell(String text) {
@@ -534,11 +629,7 @@ class _TruckDriverHomeState extends State<TruckDriverHome> {
   }
 
   Widget _buildJobContainer(
-      String? routeDetails,
-      String? startTime,
-      String buttonText,
-      bool isToday
-      ) {
+      String? routeDetails, String? startTime, String buttonText, bool isToday) {
     return Container(
       width: double.infinity,
       height: 130,
@@ -609,6 +700,4 @@ class _TruckDriverHomeState extends State<TruckDriverHome> {
       ),
     );
   }
-
-
 }

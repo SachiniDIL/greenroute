@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:greenroute/common/screens/login_or_signup.dart';
 import 'package:http/http.dart' as http;
@@ -5,6 +6,7 @@ import 'dart:convert';
 import 'package:greenroute/common/widgets/button_large.dart';
 import 'package:greenroute/common/widgets/custom_text_field.dart';
 import 'package:greenroute/common/utils/validators.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // Import shared_preferences
 import '../../theme.dart';
 import '../../common/widgets/back_arrow.dart';
 
@@ -26,6 +28,7 @@ class _RSignupState extends State<RSignup> {
   final emailController = TextEditingController();
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController(); // NEW controller for confirm password
   final homeAddressController = TextEditingController();
   final postalCodeController = TextEditingController();
 
@@ -36,8 +39,7 @@ class _RSignupState extends State<RSignup> {
       "https://greenroute-7251d-default-rtdb.firebaseio.com/resident.json"; // Replace with your actual Firebase API URL
 
   // Method to check if the email or username already exists
-  Future<bool> _checkEmailOrUsernameExists(
-      String email, String username) async {
+  Future<bool> _checkEmailOrUsernameExists(String email, String username) async {
     try {
       var response = await http.get(Uri.parse(apiUrl));
 
@@ -79,6 +81,23 @@ class _RSignupState extends State<RSignup> {
     return "RES001"; // If no resident IDs exist, return "RES001"
   }
 
+  // Method to store FCM token in SharedPreferences
+  Future<void> _saveFcmTokenToSharedPreferences(String fcmToken) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('fcmToken', fcmToken);
+    print("FCM Token saved in SharedPreferences: $fcmToken");
+  }
+
+  // Method to show a SnackBar
+  void _showSnackBar(BuildContext context, String message, Color backgroundColor) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: backgroundColor,
+      ),
+    );
+  }
+
   // Method to send data to Firebase
   Future<void> _handleSignUp() async {
     if (_formKey.currentState!.validate()) {
@@ -97,14 +116,24 @@ class _RSignupState extends State<RSignup> {
       // Check if the email or username already exists
       bool exists = await _checkEmailOrUsernameExists(email, username);
       if (exists) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Email or Username already exists")),
-        );
+        _showSnackBar(context, "Email or Username already exists", Colors.red);
         return;
       }
 
       // Get the next unique resident ID
       String residentId = await _getNextResidentId();
+
+      // Fetch FCM token
+      FirebaseMessaging messaging = FirebaseMessaging.instance;
+      String? fcmToken = await messaging.getToken();
+
+      if (fcmToken == null) {
+        _showSnackBar(context, "Failed to get FCM token", Colors.red);
+        return;
+      }
+
+      // Save the FCM token in SharedPreferences
+      await _saveFcmTokenToSharedPreferences(fcmToken);
 
       // Prepare the request payload
       Map<String, String> userData = {
@@ -118,7 +147,8 @@ class _RSignupState extends State<RSignup> {
         'password': password,
         'home_address': homeAddress,
         'postal_code': postalCode,
-        'role': 'Resident' // Save role as 'Resident'
+        'role': 'Resident', // Save role as 'Resident'
+        'fcmToken': fcmToken // Add FCM token to the data
       };
 
       try {
@@ -132,23 +162,17 @@ class _RSignupState extends State<RSignup> {
         );
 
         if (response.statusCode == 200) {
-          print('User created successfully');
-          // Navigate to ResidentHome after successful sign-up
+          _showSnackBar(context, "Sign Up Successful!", Colors.green);
+          // Navigate to LoginSignup after successful sign-up
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const LoginSignup()),
           );
         } else {
-          print('Failed to create user: ${response.body}');
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to create user: ${response.body}')),
-          );
+          _showSnackBar(context, 'Failed to create user: ${response.body}', Colors.red);
         }
       } catch (e) {
-        print('Error during sign-up: $e');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        _showSnackBar(context, 'Error: $e', Colors.red);
       }
     } else {
       print('Form validation failed');
@@ -179,7 +203,7 @@ class _RSignupState extends State<RSignup> {
                       label: "First Name",
                       hint: "Enter your first name",
                       validator: (value) =>
-                          value!.isEmpty ? 'First Name is required' : null,
+                      value!.isEmpty ? 'First Name is required' : null,
                     ),
                     const SizedBox(height: 20),
 
@@ -189,7 +213,7 @@ class _RSignupState extends State<RSignup> {
                       label: "Last Name",
                       hint: "Enter your last name",
                       validator: (value) =>
-                          value!.isEmpty ? 'Last Name is required' : null,
+                      value!.isEmpty ? 'Last Name is required' : null,
                     ),
                     const SizedBox(height: 20),
 
@@ -199,7 +223,7 @@ class _RSignupState extends State<RSignup> {
                       label: "Username",
                       hint: "Enter your username",
                       validator: (value) =>
-                          value!.isEmpty ? 'Username is required' : null,
+                      value!.isEmpty ? 'Username is required' : null,
                     ),
                     const SizedBox(height: 20),
 
@@ -209,7 +233,7 @@ class _RSignupState extends State<RSignup> {
                       label: "NIC",
                       hint: "Enter your NIC",
                       validator: (value) =>
-                          value!.isEmpty ? 'NIC is required' : null,
+                      value!.isEmpty ? 'NIC is required' : null,
                     ),
                     const SizedBox(height: 20),
 
@@ -237,7 +261,7 @@ class _RSignupState extends State<RSignup> {
                       label: "Home Address",
                       hint: "Enter your home address",
                       validator: (value) =>
-                          value!.isEmpty ? 'Home Address is required' : null,
+                      value!.isEmpty ? 'Home Address is required' : null,
                     ),
                     const SizedBox(height: 20),
 
@@ -270,7 +294,7 @@ class _RSignupState extends State<RSignup> {
 
                     // Confirm Password Field with Eye Icon
                     CustomTextField(
-                      controller: passwordController,
+                      controller: confirmPasswordController, // Use separate controller for confirm password
                       label: "Confirm Password",
                       hint: "Confirm your password",
                       obscureText: _obscureConfirmPassword,

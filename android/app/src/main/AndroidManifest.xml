@@ -8,6 +8,8 @@
 
 
     <application
+        android:enableOnBackInvokedCallback="true"
+
         android:label="greenroute"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class FuelPage extends StatelessWidget {
-  const FuelPage({Key? key}) : super(key: key);
+  const FuelPage({super.key});
 
   @override
   Widget build(BuildContext context) {

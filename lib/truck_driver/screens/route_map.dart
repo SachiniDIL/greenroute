@@ -9,7 +9,7 @@ class RouteMap extends StatefulWidget {
   final LatLng startLocation; // Route starting location
   final LatLng endLocation; // Route ending location
 
-  const RouteMap({required this.routeDetails, required this.startLocation, required this.endLocation});
+  const RouteMap({super.key, required this.routeDetails, required this.startLocation, required this.endLocation});
 
   @override
   _RouteMapState createState() => _RouteMapState();
