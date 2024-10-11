@@ -14,11 +14,25 @@ class HomeHeader extends StatefulWidget {
 
 class _HomeHeaderState extends State<HomeHeader> {
   String firstName = 'User'; // Default first name
+  String greeting = 'Good Morning'; // Default greeting
 
   @override
   void initState() {
     super.initState();
     _fetchFirstName(widget.userRole, widget.userEmail); // Fetch first name based on role and email
+    _updateGreeting(); // Set greeting based on the time of day
+  }
+
+  // Function to update the greeting based on the time of the day
+  void _updateGreeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) {
+      greeting = 'Good Morning';
+    } else if (hour < 17) {
+      greeting = 'Good Afternoon';
+    } else {
+      greeting = 'Good Evening';
+    }
   }
 
   // Function to fetch first name from Firebase
@@ -37,8 +51,8 @@ class _HomeHeaderState extends State<HomeHeader> {
 
     try {
       print('Fetching data for $userRole with email $userEmail');
-      final url = Uri.parse('$baseUrl/$endpoint');  // Ensure the URL now has the endpoint
-      print('Fetching from URL: $url'); // Log the full URL
+      final url = Uri.parse('$baseUrl/$endpoint');
+      print('Fetching from URL: $url');
       final response = await http.get(url);
 
       if (response.statusCode == 200) {
@@ -73,7 +87,8 @@ class _HomeHeaderState extends State<HomeHeader> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Good Morning,',
+                    Text(
+                      greeting, // Display dynamic greeting
                       style: TextStyle(
                         color: Color(0xFF054700),
                         fontSize: 16,

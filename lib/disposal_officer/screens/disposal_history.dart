@@ -118,7 +118,7 @@ class _DisposalHistoryState extends State<DisposalHistory> {
 
                   // Show a loading indicator while data is being fetched
                   if (isLoading)
-                    const Center(child: CircularProgressIndicator())
+                    const Center(child: CircularProgressIndicator(color: AppColors.primaryColor,))
                   else if (disposalHistory.isEmpty)
                     const Center(child: Text('No disposal history found'))
                   else

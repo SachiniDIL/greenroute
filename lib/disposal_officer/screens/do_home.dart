@@ -44,17 +44,28 @@ class _DOHomeState extends State<DOHome> {
     print("Loaded User Email: $userEmail");
   }
 
-
   Future<void> _fetchLatestDisposals() async {
     try {
-      // Fetch disposal data and truck data from the service
-      List<Map<String, dynamic>> disposals = await DisposalService.fetchDisposalHistory();
-      List<Map<String, dynamic>> trucks = await DisposalService.fetchTruckData();
+      // Fetch disposal data from the service
+      List<Map<String, dynamic>> disposals =
+          await DisposalService.fetchDisposalHistory();
+      List<Map<String, dynamic>> trucks =
+          await DisposalService.fetchTruckData();
+
+      // Initialize a variable to hold the total disposal weight
+      double totalWeight = 0;
 
       // Combine the truck data into the disposal data by matching truck_number with truck_id
       List<Map<String, dynamic>> combinedData = disposals.map((disposal) {
         String truckId = disposal['truck_number'];
-        var truck = trucks.firstWhere((truck) => truck['truck_id'] == truckId, orElse: () => {});
+        var truck = trucks.firstWhere((truck) => truck['truck_id'] == truckId,
+            orElse: () => {});
+
+        // Accumulate the disposal weight to totalWeight
+        double weight =
+            double.tryParse(disposal['disposal_weight'].toString()) ?? 0;
+        totalWeight += weight;
+
         return {
           'truckNo': truck.isNotEmpty ? truck['truck_number'] : 'Unknown',
           'date': disposal['date'] ?? 'Unknown',
@@ -64,6 +75,7 @@ class _DOHomeState extends State<DOHome> {
 
       setState(() {
         latestDisposals = combinedData.take(4).toList();
+        garbageTotal = totalWeight; // Assign the calculated total weight to garbageTotal
         isLoading = false;
       });
     } catch (e) {
@@ -82,7 +94,8 @@ class _DOHomeState extends State<DOHome> {
         content: const Text('Do you want to exit the app?'),
         actions: <Widget>[
           TextButton(
-            onPressed: () => Navigator.of(context).pop(false), // Stay in the app
+            onPressed: () => Navigator.of(context).pop(false),
+            // Stay in the app
             child: const Text('No'),
           ),
           TextButton(
@@ -95,11 +108,11 @@ class _DOHomeState extends State<DOHome> {
     return shouldExit;
   }
 
-
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return Center(child: CircularProgressIndicator(color: AppColors.primaryColor));
+      return Center(
+          child: CircularProgressIndicator(color: AppColors.primaryColor));
     }
     return PopScope(
       onPopInvokedWithResult: (bool didPop, dynamic result) async {
@@ -143,7 +156,8 @@ class _DOHomeState extends State<DOHome> {
                         ),
                         child: TextField(
                           decoration: InputDecoration(
-                            contentPadding: EdgeInsets.symmetric(vertical: 15.0),
+                            contentPadding:
+                                EdgeInsets.symmetric(vertical: 15.0),
                             prefixIcon: Icon(Icons.search, color: Colors.grey),
                             hintText: 'search for truck details',
                             border: InputBorder.none,
@@ -161,7 +175,8 @@ class _DOHomeState extends State<DOHome> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => const NewDisposal()),
+                                      builder: (context) =>
+                                          const NewDisposal()),
                                 );
                               },
                             ),
@@ -200,7 +215,9 @@ class _DOHomeState extends State<DOHome> {
                                       TextSpan(
                                         children: [
                                           TextSpan(
-                                            text: garbageTotal.toString(),
+                                            text:
+                                          (garbageTotal/1000).toStringAsFixed(2),
+                                            // Display total weight with 2 decimals
                                             style: TextStyle(
                                               color: Colors.black.withOpacity(
                                                   0.6399999856948853),

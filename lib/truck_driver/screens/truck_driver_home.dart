@@ -1,8 +1,6 @@
-import 'dart:ffi';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:greenroute/common/screens/profile.dart';
 import 'package:greenroute/disposal_officer/screens/disposal_history.dart';
 import 'package:greenroute/truck_driver/screens/fuel.dart';
 import 'package:greenroute/truck_driver/screens/route_map.dart';
@@ -18,7 +16,7 @@ import '../widgets/bottom_nav_truck.dart';
 import '../../theme.dart';
 
 class TruckDriverHome extends StatefulWidget {
-  TruckDriverHome({super.key});
+  const TruckDriverHome({super.key});
 
   @override
   _TruckDriverHomeState createState() => _TruckDriverHomeState();
