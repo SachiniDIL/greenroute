@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:firebase_messaging/firebase_messaging.dart';
+
 import '../../common/services/login_service.dart';
 import '../../disposal_officer/screens/do_home.dart';
 import '../widgets/back_arrow.dart';
@@ -24,6 +28,7 @@ class _LoginPageState extends State<LoginPage> {
   final passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>(); // Form key for validation
   final LoginService _loginService = LoginService(); // Login service
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance; // FCM instance
 
   @override
   void initState() {
@@ -92,6 +97,9 @@ class _LoginPageState extends State<LoginPage> {
         // Save login state and the user's email
         await _saveLoginState(userEmail);
 
+        // Check and update FCM token
+        await _checkAndSaveFcmToken(userRole, userEmail);
+
         // Show success SnackBar with green background
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -123,6 +131,53 @@ class _LoginPageState extends State<LoginPage> {
           const SnackBar(content: Text("Invalid username/email or password")),
         );
       }
+    }
+  }
+
+  // Method to check and save FCM token if missing
+  Future<void> _checkAndSaveFcmToken(String userRole, String userEmail) async {
+    String baseUrl = 'https://greenroute-7251d-default-rtdb.firebaseio.com';
+
+    String endpoint = '';
+    if (userRole == 'resident') {
+      endpoint = 'resident.json?orderBy="email"&equalTo="$userEmail"';
+    } else if (userRole == 'truck_driver') {
+      endpoint = 'truck_driver.json?orderBy="email"&equalTo="$userEmail"';
+    } else if (userRole == 'disposal_officer') {
+      endpoint = 'disposal_officer.json?orderBy="email"&equalTo="$userEmail"';
+    }
+
+    try {
+      final url = Uri.parse('$baseUrl/$endpoint');
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body) as Map<String, dynamic>;
+
+        if (data.isNotEmpty) {
+          final userData = data.values.first;
+
+          if (userData['fcmToken'] == null || userData['fcmToken'].isEmpty) {
+            // Get FCM token
+            String? fcmToken = await _firebaseMessaging.getToken();
+
+            if (fcmToken != null) {
+              // Save FCM token in Firebase
+              final userId = data.keys.first;
+              await http.patch(
+                Uri.parse('$baseUrl/$userRole/$userId.json'),
+                body: json.encode({'fcmToken': fcmToken}),
+              );
+
+              // Save FCM token in SharedPreferences
+              SharedPreferences prefs = await SharedPreferences.getInstance();
+              await prefs.setString('fcmToken', fcmToken);
+            }
+          }
+        }
+      }
+    } catch (e) {
+      print("Error fetching or updating FCM token: $e");
     }
   }
 

@@ -30,6 +30,8 @@ class FuelPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            Image.asset('assets/qr.png'),
+            SizedBox(height: 20,),
             // Fuel balance
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,

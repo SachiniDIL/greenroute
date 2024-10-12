@@ -3,6 +3,7 @@ import 'package:greenroute/resident/screens/resident_home.dart';
 
 import '../../theme.dart';
 import '../../common/screens/profile.dart';
+import '../screens/res_noti.dart';
 
 class BottomNavR extends StatelessWidget{
    final String current;
@@ -30,12 +31,12 @@ class BottomNavR extends StatelessWidget{
           ),
 
           GestureDetector(
-            // onTap: () {
-            //   Navigator.push(
-            //     context,
-            //     MaterialPageRoute(builder: (context) => const ResidentNotification()),
-            //   ); // Navigate to Notification screen
-            // },
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ResidentNotificationPage()),
+              ); // Navigate to Notification screen
+            },
             child: notification(current), // Notification icon
           ),
           GestureDetector(

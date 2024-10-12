@@ -85,7 +85,7 @@ class _SideBarState extends State<SideBar> {
                 },
                 child: const SideBarMenu(
                   menuText: "Support",
-                  menuIcon: Icon(Icons.support),
+                  menuIcon: Icon(Icons.phone),
                 ),
               ),
             ),

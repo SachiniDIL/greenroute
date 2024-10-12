@@ -41,7 +41,7 @@ class _TruckDriverHomeState extends State<TruckDriverHome> {
   @override
   void initState() {
     super.initState();
-    _initializeData();  // Call the new method to ensure the proper sequence
+    _initializeData(); // Call the new method to ensure the proper sequence
   }
 
   Future<void> _initializeData() async {
@@ -64,11 +64,13 @@ class _TruckDriverHomeState extends State<TruckDriverHome> {
     try {
       // Step 1: Fetch all truck drivers
       var response = await http.get(
-        Uri.parse('$dbURL/truck_driver.json?orderBy="email"&equalTo="$userEmail"'),
+        Uri.parse(
+            '$dbURL/truck_driver.json?orderBy="email"&equalTo="$userEmail"'),
       );
 
       if (response.statusCode == 200) {
-        var truckDriversData = jsonDecode(response.body) as Map<String, dynamic>;
+        var truckDriversData =
+            jsonDecode(response.body) as Map<String, dynamic>;
 
         // Step 2: Check if the response contains a valid truck driver
         if (truckDriversData.isNotEmpty) {
@@ -104,7 +106,8 @@ class _TruckDriverHomeState extends State<TruckDriverHome> {
         );
 
         if (scheduleResponse.statusCode == 200) {
-          var scheduleData = jsonDecode(scheduleResponse.body) as Map<String, dynamic>;
+          var scheduleData =
+              jsonDecode(scheduleResponse.body) as Map<String, dynamic>;
           DateTime? soonestDate; // Track the soonest available date
           String? soonestRouteId;
           String? soonestStartTime;
@@ -124,14 +127,16 @@ class _TruckDriverHomeState extends State<TruckDriverHome> {
 
                 if (_isToday(scheduledDate!)) {
                   startTime = schedule['start_time']; // Set startTime for today
-                  await _getRouteDetails(routeId, forToday: true); // Fetch and set today's route details
+                  await _getRouteDetails(routeId,
+                      forToday: true); // Fetch and set today's route details
                   setState(() {
                     // Rebuild the UI after data is fetched
                   });
                   return;
                 } else if (scheduleDate.isAfter(DateTime.now())) {
                   // Check if this is the soonest upcoming date
-                  if (soonestDate == null || scheduleDate.isBefore(soonestDate)) {
+                  if (soonestDate == null ||
+                      scheduleDate.isBefore(soonestDate)) {
                     soonestDate = scheduleDate;
                     soonestRouteId = routeId;
                     soonestStartTime = schedule['start_time'];
@@ -145,13 +150,15 @@ class _TruckDriverHomeState extends State<TruckDriverHome> {
           if (soonestDate != null) {
             upcomingScheduledDate = soonestDate.toString().split(" ")[0];
             upcomingStartTime = soonestStartTime;
-            await _getRouteDetails(soonestRouteId!, forToday: false); // Fetch and set upcoming route details
+            await _getRouteDetails(soonestRouteId!,
+                forToday: false); // Fetch and set upcoming route details
             setState(() {
               // Rebuild the UI after upcoming schedule is fetched
             });
           }
         } else {
-          print('Error fetching route schedules: ${scheduleResponse.statusCode}');
+          print(
+              'Error fetching route schedules: ${scheduleResponse.statusCode}');
         }
       } catch (e) {
         print('Error: $e');
@@ -161,7 +168,8 @@ class _TruckDriverHomeState extends State<TruckDriverHome> {
     }
   }
 
-  Future<void> _getRouteDetails(String routeId, {required bool forToday}) async {
+  Future<void> _getRouteDetails(String routeId,
+      {required bool forToday}) async {
     try {
       // Fetch route details
       var routeResponse = await http.get(
@@ -173,7 +181,8 @@ class _TruckDriverHomeState extends State<TruckDriverHome> {
         // Check if intermediate_locations exists and is a list
         if (routeData['intermediate_locations'] != null &&
             routeData['intermediate_locations'] is List) {
-          var intermediateLocations = routeData['intermediate_locations'] as List<dynamic>;
+          var intermediateLocations =
+              routeData['intermediate_locations'] as List<dynamic>;
 
           // Store the first three intermediate locations to display
           var routeDetails = intermediateLocations
@@ -205,10 +214,10 @@ class _TruckDriverHomeState extends State<TruckDriverHome> {
 
   Future<void> _getLatestDisposalRecords() async {
     if (userEmail != null) {
-      print("User Email: $userEmail");  // Debugging point
+      print("User Email: $userEmail"); // Debugging point
 
       String? empId = await _getEmpIdByEmail(userEmail!);
-      print("Emp ID: $empId");  // Debugging point
+      print("Emp ID: $empId"); // Debugging point
 
       if (empId == null) {
         print("No emp_id found for the user");
@@ -222,18 +231,19 @@ class _TruckDriverHomeState extends State<TruckDriverHome> {
         );
 
         if (disposalResponse.statusCode == 200) {
-          var disposalData = jsonDecode(disposalResponse.body) as Map<String, dynamic>;
+          var disposalData =
+              jsonDecode(disposalResponse.body) as Map<String, dynamic>;
 
-          print("Disposal Data: $disposalData");  // Debugging point
+          print("Disposal Data: $disposalData"); // Debugging point
 
           // Step 2: Filter records by truck_driver == empId
           List<Map<String, dynamic>> filteredDisposals = disposalData.entries
               .where((entry) => entry.value['truck_driver'] == empId)
               .map((entry) => {
-            'date': entry.value['date'],
-            'time': entry.value['time'],
-            'disposal_weight': entry.value['disposal_weight'],
-          })
+                    'date': entry.value['date'],
+                    'time': entry.value['time'],
+                    'disposal_weight': entry.value['disposal_weight'],
+                  })
               .toList();
 
           // Step 3: Sort the filtered disposals by date (newest first)
@@ -246,13 +256,14 @@ class _TruckDriverHomeState extends State<TruckDriverHome> {
           // Step 4: Take the latest 4 disposals
           latestDisposals = filteredDisposals.take(4).toList();
 
-          print("Latest Disposals: $latestDisposals");  // Debugging point
+          print("Latest Disposals: $latestDisposals"); // Debugging point
 
           setState(() {
             // Rebuild UI to show the latest disposals
           });
         } else {
-          print('Error fetching disposal records: ${disposalResponse.statusCode}');
+          print(
+              'Error fetching disposal records: ${disposalResponse.statusCode}');
         }
       } catch (e) {
         print('Error: $e');
@@ -264,7 +275,8 @@ class _TruckDriverHomeState extends State<TruckDriverHome> {
 
   bool _isToday(String date) {
     DateTime today = DateTime.now();
-    DateTime scheduledDateParsed = DateTime.parse(date); // Assuming date is in the format 'yyyy-MM-dd'
+    DateTime scheduledDateParsed =
+        DateTime.parse(date); // Assuming date is in the format 'yyyy-MM-dd'
 
     return today.year == scheduledDateParsed.year &&
         today.month == scheduledDateParsed.month &&
@@ -279,7 +291,8 @@ class _TruckDriverHomeState extends State<TruckDriverHome> {
         content: const Text('Do you want to exit the app?'),
         actions: <Widget>[
           TextButton(
-            onPressed: () => Navigator.of(context).pop(false), // Stay in the app
+            onPressed: () => Navigator.of(context).pop(false),
+            // Stay in the app
             child: const Text('No'),
           ),
           TextButton(
@@ -353,7 +366,8 @@ class _TruckDriverHomeState extends State<TruckDriverHome> {
                         height: 7.0,
                       ),
                       if (isTodayScheduled)
-                        _buildJobContainer(nextRouteDetails, startTime, "Start Now", true)
+                        _buildJobContainer(
+                            nextRouteDetails, startTime, "Start Now", true)
                       else
                         Column(
                           children: [
@@ -368,7 +382,8 @@ class _TruckDriverHomeState extends State<TruckDriverHome> {
                             ),
                             SizedBox(height: 10.0),
                             if (upcomingScheduledDate != null)
-                              _buildJobContainer(upcomingRouteDetails, upcomingStartTime, "View Schedule", false),
+                              _buildJobContainer(upcomingRouteDetails,
+                                  upcomingStartTime, "View Schedule", false),
                           ],
                         ),
                       SizedBox(
@@ -389,7 +404,8 @@ class _TruckDriverHomeState extends State<TruckDriverHome> {
                           ),
                         ),
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 27.0, vertical: 15.0),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 27.0, vertical: 15.0),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -397,7 +413,8 @@ class _TruckDriverHomeState extends State<TruckDriverHome> {
                                 'Oil quarter',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  color: Colors.black.withOpacity(0.6399999856948853),
+                                  color: Colors.black
+                                      .withOpacity(0.6399999856948853),
                                   fontSize: 20,
                                   fontFamily: 'Poppins',
                                   fontWeight: FontWeight.w900,
@@ -410,7 +427,8 @@ class _TruckDriverHomeState extends State<TruckDriverHome> {
                               LayoutBuilder(
                                 builder: (context, constraints) {
                                   double totalWidth = constraints.maxWidth;
-                                  double presentageWidth = (totalWidth * precentage) / 100;
+                                  double presentageWidth =
+                                      (totalWidth * precentage) / 100;
 
                                   return Stack(
                                     children: [
@@ -420,7 +438,8 @@ class _TruckDriverHomeState extends State<TruckDriverHome> {
                                         decoration: ShapeDecoration(
                                           color: Colors.white,
                                           shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(5),
+                                            borderRadius:
+                                                BorderRadius.circular(5),
                                           ),
                                         ),
                                       ),
@@ -447,7 +466,8 @@ class _TruckDriverHomeState extends State<TruckDriverHome> {
                                               shape: RoundedRectangleBorder(
                                                 borderRadius: BorderRadius.only(
                                                   topLeft: Radius.circular(5),
-                                                  bottomLeft: Radius.circular(5),
+                                                  bottomLeft:
+                                                      Radius.circular(5),
                                                 ),
                                               ),
                                             ),
@@ -456,8 +476,10 @@ class _TruckDriverHomeState extends State<TruckDriverHome> {
                                             height: 15.0,
                                             width: presentageWidth,
                                             child: Row(
-                                              mainAxisAlignment: MainAxisAlignment.center,
-                                              crossAxisAlignment: CrossAxisAlignment.center,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
                                               children: [
                                                 Text(
                                                   "$precentage%",
@@ -489,7 +511,8 @@ class _TruckDriverHomeState extends State<TruckDriverHome> {
                                 onPressed: () {
                                   Navigator.push(
                                     context,
-                                    MaterialPageRoute(builder: (context) => FuelPage()),
+                                    MaterialPageRoute(
+                                        builder: (context) => FuelPage()),
                                   );
                                 },
                               ),
@@ -553,7 +576,9 @@ class _TruckDriverHomeState extends State<TruckDriverHome> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => DisposalHistory(truckDriver: empId), // Pass the empId as the truckDriver parameter
+                      builder: (context) => DisposalHistory(
+                          truckDriver:
+                              empId), // Pass the empId as the truckDriver parameter
                     ),
                   );
                 } else {
@@ -595,7 +620,8 @@ class _TruckDriverHomeState extends State<TruckDriverHome> {
           TableRow(
             decoration: BoxDecoration(
               color: AppColors.backgroundColor,
-              border: Border(top: BorderSide(width: 2, color: Color(0xFFD1CFD7))),
+              border:
+                  Border(top: BorderSide(width: 2, color: Color(0xFFD1CFD7))),
             ),
             children: [
               _buildTableCell(disposal['date']),
@@ -626,8 +652,8 @@ class _TruckDriverHomeState extends State<TruckDriverHome> {
     );
   }
 
-  Widget _buildJobContainer(
-      String? routeDetails, String? startTime, String buttonText, bool isToday) {
+  Widget _buildJobContainer(String? routeDetails, String? startTime,
+      String buttonText, bool isToday) {
     return Container(
       width: double.infinity,
       height: 130,
@@ -675,8 +701,14 @@ class _TruckDriverHomeState extends State<TruckDriverHome> {
                   MaterialPageRoute(
                     builder: (context) => RouteMap(
                       routeDetails: routeDetails!,
-                      startLocation: LatLng(6.9271, 79.8612), // Example start location
-                      endLocation: LatLng(6.9271, 79.9000),   // Example end location
+                      startLocation: LatLng(6.9271, 79.8612),
+                      // Example start location
+                      endLocation: LatLng(6.9271, 79.9000),
+                      intermediateLocations: [
+                        LatLng(6.9279, 79.8655),
+                        LatLng(6.9411, 79.8742),
+                        LatLng(6.9489, 79.8834),
+                      ], // Example end location
                     ),
                   ),
                 );
@@ -686,8 +718,10 @@ class _TruckDriverHomeState extends State<TruckDriverHome> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => TDSchedule(
-                      upcomingScheduleDetails: routeDetails!,  // Pass route details
-                      defaultDate: upcomingScheduledDate!,     // Pass scheduled date
+                      upcomingScheduleDetails: routeDetails!,
+                      // Pass route details
+                      defaultDate:
+                          upcomingScheduledDate!, // Pass scheduled date
                     ),
                   ),
                 );

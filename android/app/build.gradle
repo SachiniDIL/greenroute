@@ -7,8 +7,8 @@ plugins {
 
 android {
     namespace "com.example.greenroute"
-    compileSdk 34 // Replace with your actual SDK version
-    ndkVersion "25.1.8937393" // Replace with the correct NDK version
+    compileSdk 34 // Set to match your target SDK version
+    ndkVersion "25.1.8937393" // Ensure this matches your installed NDK version
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -16,41 +16,42 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = "1.8" // Use '=' here instead of method call
+        jvmTarget = "1.8" // Correct usage of '='
     }
 
     defaultConfig {
         applicationId "com.example.greenroute"
-        minSdkVersion 23
-        targetSdkVersion 34 // Make sure this matches your compileSdkVersion
+        minSdkVersion 23 // Minimum supported version
+        targetSdkVersion 34
         versionCode 1
         versionName "1.0.0"
     }
 
     buildTypes {
         release {
-            signingConfig signingConfigs.debug // Adjust this for release builds
+            // Ensure you configure the signing configs for production release
+            signingConfig signingConfigs.debug // Replace with actual release signing config
         }
     }
 }
 
 flutter {
-    source "../.."
+    source "../.." // Flutter project path
 }
 
 dependencies {
-    // Firebase BoM for automatic version management of Firebase SDKs
+    // Use Firebase BoM for automatic Firebase SDK version management
     implementation platform('com.google.firebase:firebase-bom:33.4.0')
 
-    // Add Firebase and Google Play Services dependencies
+    // Firebase services
     implementation 'com.google.firebase:firebase-analytics'
     implementation 'com.google.firebase:firebase-auth'
     implementation 'com.google.firebase:firebase-database'
-    implementation 'com.google.android.gms:play-services-auth:21.2.0'
-    implementation 'com.google.android.gms:play-services-maps:19.0.0'
     implementation 'com.google.firebase:firebase-messaging'
 
+    // Google Play Services
+    implementation 'com.google.android.gms:play-services-auth:21.2.0'
+    implementation 'com.google.android.gms:play-services-maps:19.0.0'
 }
 
 apply plugin: 'com.google.gms.google-services'
-
